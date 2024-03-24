@@ -27,14 +27,19 @@ namespace s3d::SpriteStudio
 
 	private:
 
+		/// @brief プロジェクトの設定
 		ProjectSetting m_setting;
 
+		/// @brief アニメーションパック
 		Array<AnimationPack> m_animationPacks;
 
+		/// @brief セルマップ
 		Array<Cellmap> m_cellmaps;
 
+		/// @brief エフェクト
 		Array<Effect> m_effects;
 
+		/// @brief シーケンス
 		Array<SequencePack> m_sequencePacks;
 	};
 }

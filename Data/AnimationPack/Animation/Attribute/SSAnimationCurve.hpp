@@ -3,7 +3,8 @@
 
 namespace s3d::SpriteStudio
 {
-	using AnimationAttributeVariant = std::variant<
-		std::monostate
-	>;
+	struct AnimationCurve
+	{
+
+	};
 }
