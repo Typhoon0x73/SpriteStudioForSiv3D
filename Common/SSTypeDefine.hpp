@@ -8,6 +8,13 @@ namespace s3d::SpriteStudio
 	/// @brief アトリビュートの種類数
 	constexpr unsigned long long int AttributeKindNum = 43;
 
+	/// @brief 読み込むファイルの種類
+	enum class FileType
+	{
+		Unknown, ///< 不明
+		Xml,     ///< sspj
+	};
+
 	/// @brief パーツのソートモード
 	enum class PartsSortMode
 	{

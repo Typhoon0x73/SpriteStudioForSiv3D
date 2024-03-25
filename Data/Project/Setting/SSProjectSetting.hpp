@@ -7,9 +7,9 @@ namespace s3d::SpriteStudio
 	struct ProjectSetting
 	{
 		/// @brief テクスチャアドレスモード
-		TextureAddressMode addressMode;
+		TextureAddressMode addressMode{ TextureAddressMode::Repeat };
 
 		/// @brief テクスチャフィルタ
-		TextureFilter filterMode;
+		TextureFilter filterMode{ TextureFilter::Nearest };
 	};
 }
