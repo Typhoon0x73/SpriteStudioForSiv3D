@@ -5,6 +5,7 @@
 #include "../Cellmap/SSCellmap.hpp"
 #include "../Effect/SSEffect.hpp"
 #include "../SequencePack/SSSequencePack.hpp"
+#include "../Sound/SSSound.hpp"
 
 namespace s3d::SpriteStudio
 {
@@ -41,5 +42,8 @@ namespace s3d::SpriteStudio
 
 		/// @brief シーケンス
 		Array<SequencePack> m_sequencePacks;
+
+		/// @brief サウンド
+		Array<Sound> m_sounds;
 	};
 }

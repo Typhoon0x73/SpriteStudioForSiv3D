@@ -186,6 +186,17 @@ namespace s3d::SpriteStudio
 		Particle,     ///< パーティクル
 	};
 
+	/// @brief シグナルの種類
+	enum class SignalType
+	{
+		Invalid = -1, ///< 無効値
+		None,         ///< 無し
+		Index,        ///< リスト
+		Integer,      ///< 整数
+		Float,        ///< 浮動小数
+		Text,         ///< テキスト
+	};
+
 	/// @brief 基点
 	enum class Anchor : unsigned char
 	{
