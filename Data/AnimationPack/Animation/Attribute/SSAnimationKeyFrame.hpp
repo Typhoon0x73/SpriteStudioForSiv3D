@@ -9,15 +9,15 @@ namespace s3d::SpriteStudio
 	struct AnimationKeyFrame
 	{
 		/// @brief フレーム
-		int32 frame;
+		int32 frame{ 0 };
 
 		/// @brief 補間の種類
-		InterpolationType interpolationType;
+		InterpolationType interpolationType{ InterpolationType::Invalid };
 
 		/// @brief 曲線補間計算用パラメータ
-		AnimationCurve curve;
+		AnimationCurve curve{};
 
 		/// @brief 値
-		AnimationAttributeVariant attributeVariantValue;
+		AnimationAttributeVariant attributeVariantValue{ std::monostate{} };
 	};
 }

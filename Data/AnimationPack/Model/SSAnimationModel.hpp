@@ -9,9 +9,9 @@ namespace s3d::SpriteStudio
 	struct AnimationModel
 	{
 		/// @brief パーツリスト
-		Array<AnimationModelPart> parts;
+		Array<AnimationModelPart> parts{};
 
 		/// @brief メッシュバインドリスト
-		Array<AnimationModelMeshBind> meshBinds;
+		Array<AnimationModelMeshBind> meshBinds{};
 	};
 }

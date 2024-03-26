@@ -8,21 +8,21 @@ namespace s3d::SpriteStudio
 	struct Cell
 	{
 		/// @brief 名前
-		String name;
+		String name{ U"" };
 
 		/// @brief 切り抜き矩形
-		Rect rect;
+		Rect rect{ Rect::Empty() };
 
 		/// @brief 原点。(rect.size/2) が中央=(0,0)になる。
-		Float2 pivot;
+		Float2 pivot{ Float2::Zero() };
 
 		/// @brief 左方向に９０度回転されている。uvの割り当てが変わる。
-		bool isRotated;
+		bool isRotated{ false };
 
 		/// @brief  親テクスチャのサイズ
-		Size textureSize;
+		Size textureSize{ Size::One() };
 
-		/// @brief メッシュ情報。nullptrでなければメッシュ
-		std::unique_ptr<CellMeshInfo> pMeshInfo;
+		/// @brief メッシュ情報。noneでなければメッシュ
+		Optional<CellMeshInfo> pMeshInfo{ none };
 	};
 }

@@ -8,15 +8,15 @@ namespace s3d::SpriteStudio
 	struct ModelPartInfoShape
 	{
 		/// @brief シェイプの種類
-		ShapeType shapeType;
+		ShapeType shapeType{ ShapeType::Invalid };
 
 		/// @brief マスク
-		bool isMask;
+		bool isMask{ false };
 
 		/// @brief 更新が必要か
-		bool isUpdate;
+		bool isUpdate{ false };
 
 		/// @brief シェイプ
-		Shape2D shape;
+		Shape2D shape{};
 	};
 }

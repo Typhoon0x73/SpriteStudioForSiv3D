@@ -7,6 +7,6 @@ namespace s3d::SpriteStudio
 	struct AttributeValueTextureChange
 	{
 		/// @brief 画像ファイル名(拡張子含む)
-		String textureName;
+		String textureName{ U"" };
 	};
 }

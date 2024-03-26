@@ -10,18 +10,18 @@ namespace s3d::SpriteStudio
 	struct Animation
 	{
 		/// @brief アニメーション名
-		String name;
+		String name{ U"" };
 
-		/// @brief アニメーションの設定。nullptrの場合、packのアニメーション設定を利用する。
-		std::unique_ptr<AnimationSetting> pSetting;
+		/// @brief アニメーションの設定。noneの場合、packのアニメーション設定を利用する。
+		Optional<AnimationSetting> overrideSetting{ none };
 
 		/// @brief ラベル
-		Array<Label> labels;
+		Array<Label> labels{};
 
 		/// @brief アニメーションする各パーツ
-		Array<AnimationPart> animationParts;
+		Array<AnimationPart> animationParts{};
 
 		/// @brief セットアップアニメーションか
-		bool isSetup;
+		bool isSetup{ false };
 	};
 }

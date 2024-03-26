@@ -19,7 +19,10 @@ namespace s3d::SpriteStudio
 		: Project{}
 	{
 		// ファイルから読み込み
-		Utilities::LoadProject(path, this);
+		if (not(Utilities::LoadProject(path, this)))
+		{
+			clear();
+		}
 	}
 
 	//================================================================================
@@ -88,6 +91,12 @@ namespace s3d::SpriteStudio
 	void Project::addSound(const Sound& sound)
 	{
 		m_sounds.emplace_back(sound);
+	}
+
+	//================================================================================
+	Project::operator bool() const noexcept
+	{
+		return not(isEmpty());
 	}
 
 }

@@ -11,19 +11,19 @@ namespace s3d::SpriteStudio
 		struct BlendColorValue
 		{
 			/// @brief カラー値
-			Color rgba;
+			Color rgba{ Palette::White };
 
 			/// @brief 反映率
-			float rate;
+			float rate{ 1.0f };
 		};
 
 		/// @brief ブレンドの適用方法 単色(全体), 頂点単位
-		ColorBlendTarget target;
+		ColorBlendTarget target{ ColorBlendTarget::Invalid };
 
 		/// @brief ブレンドの種類
-		BlendType blendType;
+		BlendType blendType{ BlendType::Invalid };
 
 		/// @brief 頂点単位の場合使用されるカラー値 or target=wholeで単色colors[0]を利用。
-		BlendColorValue colors[4];
+		BlendColorValue colors[4]{};
 	};
 }

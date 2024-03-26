@@ -11,26 +11,26 @@ namespace s3d::SpriteStudio
 		struct Info
 		{
 			/// @brief ボーン名
-			String boneName;
+			String boneName{ U"" };
 
 			/// @brief 重み
-			int32 weight;
+			int32 weight{ 0 };
 
 			/// @brief ボーンインデックス
-			int32 boneIndex;
+			int32 boneIndex{ -1 };
 
 			/// @brief オフセット
-			Float2 offset;
+			Float2 offset{ Float2::Zero() };
 		};
 		using BindBoneInfomations = std::array<Info, MeshBindBoneMax>;
 
 		/// @brief メッシュバインド名
-		String name;
+		String name{ U"" };
 
 		/// @brief 頂点毎のバインド情報
-		Array<BindBoneInfomations> vertexBinds;
+		Array<BindBoneInfomations> vertexBinds{};
 
 		/// @brief 有効なバインド数
-		int32 bindBoneNum;
+		int32 bindBoneNum{ 0 };
 	};
 }

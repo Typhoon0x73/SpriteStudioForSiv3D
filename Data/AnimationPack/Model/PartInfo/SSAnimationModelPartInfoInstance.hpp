@@ -7,9 +7,9 @@ namespace s3d::SpriteStudio
 	struct ModelPartInfoInstance
 	{
 		/// @brief 参照するアニメーションパック名
-		String refAnimationPackName;
+		String refAnimationPackName{ U"" };
 
 		/// @brief 参照するアニメーション名
-		String refAnimationName;
+		String refAnimationName{ U"" };
 	};
 }

@@ -6,9 +6,9 @@ namespace s3d::SpriteStudio
 	struct Label
 	{
 		/// @brief ラベル名
-		String name;
+		String name{ U"" };
 
 		/// @brief ラベルが設置されたフレーム
-		int32 frame;
+		int32 frame{ 0 };
 	};
 }

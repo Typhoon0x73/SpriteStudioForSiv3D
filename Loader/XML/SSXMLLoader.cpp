@@ -1,6 +1,7 @@
 ﻿#include "SSXMLLoader.hpp"
 #include "../../Common/SSOutputDebugLog.hpp"
-#include "Perser/SSXMLPerser.hpp"
+#include "Parser/Project/SSProjectParser.hpp"
+#include "Parser/AnimationPack/SSAnimationPackParser.hpp"
 
 namespace s3d::SpriteStudio
 {
@@ -25,22 +26,86 @@ namespace s3d::SpriteStudio
 		}
 
 		// sspjファイルの読み込み
-		XMLReader sspj{ filePath };
-		if (sspj.isNull())
+		XMLParser::SSPJInfo sspjInfo;
 		{
-			DebugLog::Print(DebugLog::LogType::Error, U"XMLファイルの読み込みに失敗しました。");
-			return false;
+			XMLReader sspj{ filePath };
+			DebugLog::Print(DebugLog::LogType::Verbose, U"以下ファイルの読み込み開始。");
+			DebugLog::Print(DebugLog::LogType::Verbose, filePath);
+			if (sspj.isNull())
+			{
+				DebugLog::Print(DebugLog::LogType::Error, U"XMLファイルの読み込みに失敗しました。");
+				return false;
+			}
+
+			// sspjの解析
+			if (not(XMLParser::ProjectParser(sspj, sspjInfo)))
+			{
+				DebugLog::Print(DebugLog::LogType::Error, U"sspjの解析に失敗しました。");
+				return false;
+			}
+
+			// 解析したデータをプロジェクトデータに追加
+			pOut->setProjectSetting(sspjInfo.projectSetting);
 		}
 
-		// パーサーでデータに入れる
-		if (not(XMLPerser::Perse(FileSystem::ParentPath(filePath), sspj, *pOut)))
+		// プロジェクトのフォルダ
+		FilePath projectDir = FileSystem::ParentPath(filePath);
+
+		// ssaeファイルの読み込み
+		for(const auto& it : sspjInfo.animPackNames)
 		{
-			DebugLog::Print(DebugLog::LogType::Error, U"sspjのパースに失敗しました。");
-			return false;
+			FilePath ssaeDir = FileSystem::PathAppend(projectDir, sspjInfo.relativeAnimBaseDir);
+			FilePath ssaePath = FileSystem::PathAppend(ssaeDir, it);
+			XMLReader ssae{ ssaePath };
+			DebugLog::Print(DebugLog::LogType::Verbose, U"以下ファイルの読み込み開始。");
+			DebugLog::Print(DebugLog::LogType::Verbose, ssaePath);
+			if (ssae.isNull())
+			{
+				DebugLog::Print(DebugLog::LogType::Error, U"XMLファイルの読み込みに失敗しました。");
+				return false;
+			}
+
+			// ssaeの解析
+			AnimationPack animPack;
+			if (not(XMLParser::AnimationPackParser(ssae, animPack)))
+			{
+				DebugLog::Print(DebugLog::LogType::Error, U"ssaeの解析に失敗しました。");
+				return false;
+			}
+
+			// セットアップアニメーションを設定しておく
+			for (auto& animation : animPack.animations)
+			{
+				if (animation.isSetup)
+				{
+					animPack.pSetupAnimation = &animation;
+					break;
+				}
+			}
+
+			// セットアップデータがないのはスプライトスタジオVer6未満のデータである可能性がある。
+			// Ver6未満は動作保証するつもりが無いので警告を出しておく。
+			if (animPack.pSetupAnimation == nullptr)
+			{
+				DebugLog::Print(DebugLog::LogType::Werning, U"セットアップデータがありません。");
+			}
+
+			// 解析したデータをプロジェクトデータに追加
+			pOut->addAnimationPack(std::move(animPack));
 		}
+
+		// ssceの解析
+
+		// sseeの解析
+
+		// ssqeの解析
+		
+		// fntの解析
+
+		// ssseの解析
 
 		// 成功
-		DebugLog::Print(DebugLog::LogType::Verbose, U"sspjのの読み込みに成功。");
+		DebugLog::Print(DebugLog::LogType::Verbose, U"プロジェクトの読み込みに成功。");
 		return true;
 	}
 

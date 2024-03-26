@@ -9,33 +9,33 @@ namespace s3d::SpriteStudio
 	struct AnimationModelPart
 	{
 		/// @brief 名前
-		String name;
+		String name{ U"" };
 
 		/// @brief ツリーを配列にしたときのインデックス
-		int32 arrayIndex;
+		int32 arrayIndex{ -1 };
 
 		/// @brief 親パーツのインデックス
-		int32 parentIndex;
+		int32 parentIndex{ -1 };
 
 		/// @brief パーツの種類
-		PartType partType;
+		PartType partType{ PartType::Invalid };
 
 		/// @brief 当たり判定形状の種類
-		BoundsType boundsType;
+		BoundsType boundsType{ BoundsType::Invalid };
 
 		/// @brief 継承の種類
-		InheritType inheritType;
+		InheritType inheritType{ InheritType::Invalid };
 
 		/// @brief アルファブレンドの種類
-		BlendType blendType;
+		BlendType blendType{ BlendType::Invalid };
 
 		/// @brief マスクの影響を受けるかどうか
-		bool isMaskInfluence;
+		bool isMaskInfluence{ false };
 
 		/// @brief 親のアルファ値の継承率
-		float alphaIheritRate;
+		float alphaIheritRate{ 1.0f };
 
 		/// @brief パーツ毎の情報
-		ModelPartInfoVariant partVariantValue;
+		ModelPartInfoVariant partVariantValue{ std::monostate{} };
 	};
 }

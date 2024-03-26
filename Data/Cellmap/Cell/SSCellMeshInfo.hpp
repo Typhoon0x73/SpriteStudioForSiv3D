@@ -7,9 +7,9 @@ namespace s3d::SpriteStudio
 	struct CellMeshInfo
 	{
 		/// @brief 座標リスト
-		Array<Float2> points;
+		Array<Float2> points{};
 
 		/// @brief トライアングルリスト
-		Array<TriangleIndex> triangles;
+		Array<TriangleIndex> triangles{};
 	};
 }

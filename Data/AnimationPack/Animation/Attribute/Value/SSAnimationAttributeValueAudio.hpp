@@ -7,12 +7,12 @@ namespace s3d::SpriteStudio
 	struct AttributeValueAudio
 	{
 		/// @brief 
-		int32 id;
+		int32 id{ -1 };
 
 		/// @brief 
-		String name;
+		String name{ U"" };
 
 		/// @brief 
-		int32 loopNum;
+		int32 loopNum{ 1 };
 	};
 }

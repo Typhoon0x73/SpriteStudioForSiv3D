@@ -7,9 +7,9 @@ namespace s3d::SpriteStudio
 	struct ModelPartInfoArmature
 	{
 		/// @brief ボーンの位置
-		Float2 bonePosition;
+		Float2 bonePosition{ Float2::Zero() };
 
 		/// @brief ボーンの回転(degree)
-		float boneRotation;
+		float boneRotation{ 0.0f };
 	};
 }

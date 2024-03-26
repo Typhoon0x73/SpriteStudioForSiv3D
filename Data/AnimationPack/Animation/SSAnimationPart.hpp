@@ -8,9 +8,9 @@ namespace s3d::SpriteStudio
 	struct AnimationPart
 	{
 		/// @brief パーツ名
-		String name;
+		String name{ U"" };
 
 		/// @brief アトリビュート
-		Array<AnimationAttribute> attributes;
+		Array<AnimationAttribute> attributes{};
 	};
 }

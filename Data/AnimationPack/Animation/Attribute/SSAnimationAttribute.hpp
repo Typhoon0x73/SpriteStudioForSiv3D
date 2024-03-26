@@ -9,9 +9,9 @@ namespace s3d::SpriteStudio
 	struct AnimationAttribute
 	{
 		/// @brief アトリビュートの種類
-		AttributeKind kind;
+		AttributeKind kind{ AttributeKind::Invalid };
 
 		/// @brief アトリビュートのキーフレーム
-		Array<AnimationKeyFrame> keyFrames;
+		Array<AnimationKeyFrame> keyFrames{};
 	};
 }

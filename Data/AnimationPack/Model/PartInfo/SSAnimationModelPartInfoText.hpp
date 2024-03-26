@@ -7,24 +7,24 @@ namespace s3d::SpriteStudio
 	struct ModelPartInfoText
 	{
 		/// @brief テキスト
-		String text;
+		String text{ U"" };
 
 		/// @brief フォント情報
-		ModelPartInfoTextFontDesc fontDesc;
+		ModelPartInfoTextFontDesc fontDesc{};
 
 		/// @brief スムース
-		bool isSmooth;
+		bool isSmooth{ false };
 
 		/// @brief マスク
-		bool isMask;
+		bool isMask{ false };
 
 		/// @brief 幅
-		int32 width;
+		int32 width{ 1 };
 
 		/// @brief 高さ
-		int32 height;
+		int32 height{ 1 };
 
 		/// @brief 更新が必要か
-		bool isUpdate;
+		bool isUpdate{ false };
 	};
 }

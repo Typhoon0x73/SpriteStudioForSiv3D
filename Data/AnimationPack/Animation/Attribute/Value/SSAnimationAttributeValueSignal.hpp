@@ -18,32 +18,32 @@ namespace s3d::SpriteStudio
 		struct CommandParam
 		{
 			/// @brief 識別ID
-			String id;
+			String id{ U"" };
 
 			/// @brief パラメータの種類
-			SignalType type;
+			SignalType type{ SignalType::Invalid };
 
 			/// @brief 値
-			SignalValue value;
+			SignalValue value{ std::monostate{} };
 		};
 
 		/// @brief コマンド
 		struct Command
 		{
 			/// @brief 有効か
-			bool isActive;
+			bool isActive{ false };
 
 			/// @brief コマンドID
-			String id;
+			String id{ U"" };
 
 			/// @brief パラメータリスト
-			Array<CommandParam> params;
+			Array<CommandParam> params{};
 
 			/// @brief メモ
-			String note;
+			String note{ U"" };
 		};
 
 		/// @brief コマンドリスト
-		Array<Command> commands;
+		Array<Command> commands{};
 	};
 }

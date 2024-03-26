@@ -9,18 +9,18 @@ namespace s3d::SpriteStudio
 	struct Cellmap
 	{
 		/// @brief セルマップ名
-		String name;
+		String name{ U"" };
 
 		/// @brief 参照画像ファイルパス。プロジェクト設定の画像基準相対
-		FilePath imagePath;
+		FilePath imagePath{ U"" };
 
 		/// @brief 画像のピクセルWHサイズ
-		Size pixelSize;
+		Size pixelSize{ Size::One() };
 
-		/// @brief nullptrでなければプロジェクトの設定を使わずこちらを使用する
-		std::unique_ptr<ProjectSetting> pOverrideSetting;
+		/// @brief noneでなければプロジェクトの設定を使わずこちらを使用する
+		Optional<ProjectSetting> overrideSetting{ none };
 
 		/// @brief セルリスト
-		Array<Cell> cells;
+		Array<Cell> cells{};
 	};
 }

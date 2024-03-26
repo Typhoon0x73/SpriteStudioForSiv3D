@@ -7,9 +7,9 @@ namespace s3d::SpriteStudio
 	struct AttributeValueCell
 	{
 		/// @brief AnimationPackのCellmapNamesに対応したインデックス
-		int32 mapId;
+		int32 mapId{ -1 };
 
 		/// @brief Cellmap内の参照するCell名
-		String name;
+		String name{ U"" };
 	};
 }

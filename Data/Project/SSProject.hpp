@@ -32,7 +32,7 @@ namespace s3d::SpriteStudio
 		/// @brief プロジェクトデータが空の状態か判定します。
 		/// @return 初期の状態、空の状態であればtrue, 何かしらデータがあればfalseが返ります。
 		[[nodiscard]]
-		bool isEmpty() const;
+		bool isEmpty() const noexcept;
 
 		/// @brief プロジェクトの設定を設定します。
 		/// @param setting 設定するプロジェクトの設定
@@ -58,25 +58,30 @@ namespace s3d::SpriteStudio
 		/// @param sound 追加するサウンド
 		void addSound(const Sound& sound);
 
+		/// @brief プロジェクトデータが空でないかを返します。
+		/// @return プロジェクトデータが空でない場合 true, それ以外の場合は false
+		[[nodiscard]]
+		explicit operator bool() const noexcept;
+
 	private:
 
 		/// @brief プロジェクトの設定
-		ProjectSetting m_setting;
+		ProjectSetting m_setting{};
 
 		/// @brief アニメーションパック
-		Array<AnimationPack> m_animationPacks;
+		Array<AnimationPack> m_animationPacks{};
 
 		/// @brief セルマップ
-		Array<Cellmap> m_cellmaps;
+		Array<Cellmap> m_cellmaps{};
 
 		/// @brief エフェクト
-		Array<Effect> m_effects;
+		Array<Effect> m_effects{};
 
 		/// @brief シーケンスパック
-		Array<SequencePack> m_sequencePacks;
+		Array<SequencePack> m_sequencePacks{};
 
 		/// @brief サウンド
-		Array<Sound> m_sounds;
+		Array<Sound> m_sounds{};
 
 	};
 }

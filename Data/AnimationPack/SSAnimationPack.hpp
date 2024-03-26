@@ -10,21 +10,21 @@ namespace s3d::SpriteStudio
 	struct AnimationPack
 	{
 		/// @brief パック名
-		String name;
+		String name{ U"" };
 
 		/// @brief アニメーション設定
-		AnimationSetting setting;
+		AnimationSetting setting{};
 
 		/// @brief アニメーション用モデル
-		AnimationModel model;
+		AnimationModel model{};
 
 		/// @brief 参照するセットアップアニメーション
-		Animation* pSetupAnimation;
+		Animation* pSetupAnimation{ nullptr };
 
 		/// @brief 利用するセルマップ名一覧
-		Array<String> cellmapNames;
+		Array<String> cellmapNames{};
 
 		/// @brief パックに含まれるアニメーションデータ
-		Array<Animation> animations;
+		Array<Animation> animations{};
 	};
 }

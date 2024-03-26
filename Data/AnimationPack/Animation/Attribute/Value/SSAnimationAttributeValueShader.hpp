@@ -7,9 +7,9 @@ namespace s3d::SpriteStudio
 	struct AttributeValueShader
 	{
 		/// @brief シェーダー識別ID
-		String id;
+		String id{ U"" };
 
 		/// @brief 各パラメータ
-		float param[4];
+		float param[4]{ 0.0f, 0.0f, 0.0f, 0.0f };
 	};
 }

@@ -7,6 +7,6 @@ namespace s3d::SpriteStudio
 	struct ModelPartInfoEffect
 	{
 		/// @brief 参照するエフェクト名
-		String refEffectName;
+		String refEffectName{ U"" };
 	};
 }

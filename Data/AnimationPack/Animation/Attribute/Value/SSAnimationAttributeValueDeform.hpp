@@ -7,6 +7,6 @@ namespace s3d::SpriteStudio
 	struct AttributeValueDeform
 	{
 		/// @brief 頂点変形リスト
-		Array<Float2> verticesChanges;
+		Array<Float2> verticesChanges{};
 	};
 }

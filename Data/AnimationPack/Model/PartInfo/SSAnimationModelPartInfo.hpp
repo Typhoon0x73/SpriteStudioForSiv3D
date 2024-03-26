@@ -4,6 +4,7 @@
 #include "SSAnimationModelPartInfoNormal.hpp"
 #include "SSAnimationModelPartInfoText.hpp"
 #include "SSAnimationModelPartInfoInstance.hpp"
+#include "SSAnimationModelPartInfoArmature.hpp"
 #include "SSAnimationModelPartInfoEffect.hpp"
 #include "SSAnimationModelPartInfoMesh.hpp"
 #include "SSAnimationModelPartInfoMovenode.hpp"
@@ -23,6 +24,7 @@ namespace s3d::SpriteStudio
 		, ModelPartInfoNormal
 		, ModelPartInfoText
 		, ModelPartInfoInstance
+		, ModelPartInfoArmature
 		, ModelPartInfoEffect
 		, ModelPartInfoMesh
 		, ModelPartInfoMovenode

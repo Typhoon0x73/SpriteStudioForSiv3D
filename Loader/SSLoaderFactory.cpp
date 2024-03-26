@@ -5,7 +5,7 @@
 namespace s3d::SpriteStudio
 {
 	//================================================================================
-	std::unique_ptr<ILoader>&& LoaderFactory::Create(FileType fileType)
+	std::unique_ptr<ILoader> LoaderFactory::Create(FileType fileType)
 	{
 		switch (fileType)
 		{
@@ -17,7 +17,7 @@ namespace s3d::SpriteStudio
 		case FileType::Xml:
 		{
 			DebugLog::Print(DebugLog::LogType::Verbose, U"XMLLoaderを作成します。");
-			return std::move(std::make_unique<XMLLoader>());
+			return std::make_unique<XMLLoader>();
 		}
 		default:
 		{

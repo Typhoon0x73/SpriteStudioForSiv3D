@@ -16,6 +16,6 @@ namespace s3d::SpriteStudio
 	struct AttributeValueUser
 	{
 		/// @brief 値
-		AttributeValueUserVariant param;
+		AttributeValueUserVariant param{ std::monostate{} };
 	};
 }

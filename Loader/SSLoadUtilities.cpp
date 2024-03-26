@@ -59,7 +59,7 @@ namespace s3d::SpriteStudio::Utilities
 		}
 
 		// ローダーを作成
-		std::unique_ptr<ILoader> pLoader = std::move(LoaderFactory::Create(fileType));
+		std::unique_ptr<ILoader> pLoader = LoaderFactory::Create(fileType);
 		if (pLoader == nullptr)
 		{
 			DebugLog::Print(DebugLog::LogType::Error, U"Loaderの生成に失敗しました。");

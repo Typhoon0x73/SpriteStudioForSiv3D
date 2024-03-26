@@ -8,24 +8,24 @@ namespace s3d::SpriteStudio
 	struct ModelPartInfoTextFontDesc
 	{
 		/// @brief ビットマップ
-		bool isBitmap;
+		bool isBitmap{ false };
 
 		/// @brief ファミリ
-		String family;
+		String family{ U"" };
 
 		/// @brief キャラマップ
-		String charMap;
+		String charMap{ U"" };
 
 		/// @brief サイズ
-		int32 size;
+		int32 size{ 1 };
 
 		/// @brief スペース
-		float space;
+		float space{ 0.0f };
 
 		/// @brief アンカー
-		Anchor anchor;
+		Anchor anchor{ Anchor::None };
 
 		/// @brief 更新が必要か
-		bool isUpdate;
+		bool isUpdate{ false };
 	};
 }
