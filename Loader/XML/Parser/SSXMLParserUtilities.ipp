@@ -25,10 +25,11 @@ inline bool TextToEnum(const XMLElement& element, StringView name, const std::ar
 	return false;
 }
 
+//================================================================================
 template< class T, size_t N >
 inline bool AttributeToEnum(const XMLElement& element, StringView key, const std::array<std::pair<const char32_t*, T>, N>& table, T& out)
 {
-	auto attribute = element.attribute(key);
+	auto attribute = element.attribute(String(key));
 
 	DebugLog::Print(DebugLog::LogType::Verbose, U"--- attribute to enum --------");
 	if (not(attribute))

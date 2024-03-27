@@ -42,7 +42,7 @@ namespace s3d::SpriteStudio
 	}
 
 	//================================================================================
-	bool Project::isEmpty() const
+	bool Project::isEmpty() const noexcept
 	{
 		if (
 			(m_animationPacks.size() != 0)
@@ -91,6 +91,24 @@ namespace s3d::SpriteStudio
 	void Project::addSound(const Sound& sound)
 	{
 		m_sounds.emplace_back(sound);
+	}
+
+	//================================================================================
+	const Array<Cellmap>& Project::getCellmaps() const noexcept
+	{
+		return m_cellmaps;
+	}
+
+	//================================================================================
+	ResourcePack& Project::getResourcePackRaw() noexcept
+	{
+		return m_resourcePack;
+	}
+
+	//================================================================================
+	const ResourcePack& Project::getResourcePack() const noexcept
+	{
+		return m_resourcePack;
 	}
 
 	//================================================================================

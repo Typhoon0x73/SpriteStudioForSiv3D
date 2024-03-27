@@ -6,6 +6,7 @@
 #include "../Effect/SSEffect.hpp"
 #include "../SequencePack/SSSequencePack.hpp"
 #include "../Sound/SSSound.hpp"
+#include "../ResourcePack/SSResourcePack.hpp"
 
 namespace s3d::SpriteStudio
 {
@@ -58,6 +59,21 @@ namespace s3d::SpriteStudio
 		/// @param sound 追加するサウンド
 		void addSound(const Sound& sound);
 
+		/// @brief セルマップリストを取得します。
+		/// @return セルマップリスト
+		[[nodiscard]]
+		const Array<Cellmap>& getCellmaps() const noexcept;
+
+		/// @brief 素材データを参照で取得します。
+		/// @return 素材データ
+		[[nodiscard]]
+		ResourcePack& getResourcePackRaw() noexcept;
+
+		/// @brief 素材データを取得します。
+		/// @return 素材データ
+		[[nodiscard]]
+		const ResourcePack& getResourcePack() const noexcept;
+
 		/// @brief プロジェクトデータが空でないかを返します。
 		/// @return プロジェクトデータが空でない場合 true, それ以外の場合は false
 		[[nodiscard]]
@@ -83,5 +99,7 @@ namespace s3d::SpriteStudio
 		/// @brief サウンド
 		Array<Sound> m_sounds{};
 
+		/// @brief 素材データ
+		ResourcePack m_resourcePack{};
 	};
 }

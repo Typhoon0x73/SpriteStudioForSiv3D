@@ -3,19 +3,20 @@
 
 namespace s3d::SpriteStudio
 {
-	/// @brief ユーザー指定データ
-	using AttributeValueUserVariant = std::variant<
-		std::monostate
-		, Float2
-		, int32
-		, RectF
-		, String
-	>;
-
 	/// @brief ユーザーパラメータ
 	struct AttributeValueUser
 	{
-		/// @brief 値
-		AttributeValueUserVariant param{ std::monostate{} };
+		/// @brief 整数
+		Optional<int32> integerOpt{ none };
+
+		/// @brief 矩形
+		Optional<RectF> rectOpt{ none };
+
+		/// @brief 座標
+		Optional<Float2> pointOpt{ none };
+
+		/// @brief 文字列
+		Optional<String> stringOpt{ none };
+
 	};
 }

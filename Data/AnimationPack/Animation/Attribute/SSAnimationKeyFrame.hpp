@@ -15,7 +15,10 @@ namespace s3d::SpriteStudio
 		InterpolationType interpolationType{ InterpolationType::Invalid };
 
 		/// @brief 曲線補間計算用パラメータ
-		AnimationCurve curve{};
+		Optional<AnimationCurve> curveOpt{ none };
+
+		/// @brief イーズ補間用パラメータ
+		Optional<float> easingRateOpt{ none };
 
 		/// @brief 値
 		AnimationAttributeVariant attributeVariantValue{ std::monostate{} };

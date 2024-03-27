@@ -18,7 +18,7 @@ namespace s3d::SpriteStudio
 		Size pixelSize{ Size::One() };
 
 		/// @brief noneでなければプロジェクトの設定を使わずこちらを使用する
-		Optional<ProjectSetting> overrideSetting{ none };
+		Optional<ProjectSetting> overrideSettingOpt{ none };
 
 		/// @brief セルリスト
 		Array<Cell> cells{};

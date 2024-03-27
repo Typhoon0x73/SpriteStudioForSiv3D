@@ -43,7 +43,7 @@ namespace s3d::SpriteStudio::Utilities
 	//================================================================================
 	bool LoadProject(FilePathView filePath, Project* pOut)
 	{
-		DebugLog::Print(DebugLog::LogType::Verbose, U"読み込むファイルパス: {}"_fmt(filePath));
+		DebugLog::Print(DebugLog::LogType::Info, U"読み込むファイルパス: {}"_fmt(filePath));
 		if (pOut == nullptr)
 		{
 			DebugLog::Print(DebugLog::LogType::Werning, U"出力先がnullptrです。");
@@ -81,7 +81,7 @@ namespace s3d::SpriteStudio::Utilities
 		}
 
 		// 成功。
-		DebugLog::Print(DebugLog::LogType::Verbose, U"{}の読み込みに成功しました。"_fmt(filePath));
+		DebugLog::Print(DebugLog::LogType::Info, U"{}の読み込みに成功しました。"_fmt(filePath));
 		return true;
 	}
 

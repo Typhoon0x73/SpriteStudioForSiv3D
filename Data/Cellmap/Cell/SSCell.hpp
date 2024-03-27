@@ -23,6 +23,6 @@ namespace s3d::SpriteStudio
 		Size textureSize{ Size::One() };
 
 		/// @brief メッシュ情報。noneでなければメッシュ
-		Optional<CellMeshInfo> pMeshInfo{ none };
+		Optional<CellMeshInfo> meshInfoOpt{ none };
 	};
 }
