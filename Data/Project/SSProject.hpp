@@ -59,6 +59,11 @@ namespace s3d::SpriteStudio
 		/// @param sound 追加するサウンド
 		void addSound(const Sound& sound);
 
+		/// @brief プロジェクト設定を取得します。
+		/// @return プロジェクト設定
+		[[nodiscard]]
+		const ProjectSetting& getProjectSetting() const noexcept;
+
 		/// @brief セルマップリストを取得します。
 		/// @return セルマップリスト
 		[[nodiscard]]
@@ -73,6 +78,26 @@ namespace s3d::SpriteStudio
 		/// @return 素材データ
 		[[nodiscard]]
 		const ResourcePack& getResourcePack() const noexcept;
+
+		/// @brief アニメーションパック名からアニメーションパックを探します。
+		/// @param animationPackName アニメーションパック名
+		/// @return 見つかればアニメーションパックのポインタが返ります。 それ以外 nullptr
+		[[nodiscard]]
+		const AnimationPack* const findAnimationPack(StringView animationPackName) const;
+
+		/// @brief アニメーションパック名,アニメーション名からアニメーションを探します。
+		/// @param animationPackName アニメーションパック名
+		/// @param animationName アニメーション名
+		/// @return 見つかればアニメーションのポインタが返ります。 それ以外 nullptr
+		[[nodiscard]]
+		const Animation* const findAnimation(StringView animationPackName, StringView animationName) const;
+
+		/// @brief 指定情報からセルを探します。
+		/// @param mapId セルマップID
+		/// @param cellName セル名
+		/// @return 見つかった場合、セルへのポインタが返ります。それ以外 nullptr
+		[[nodiscard]]
+		const Cell* const findCell(int32 mapId, StringView cellName) const noexcept;
 
 		/// @brief プロジェクトデータが空でないかを返します。
 		/// @return プロジェクトデータが空でない場合 true, それ以外の場合は false

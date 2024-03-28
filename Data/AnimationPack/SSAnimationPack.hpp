@@ -26,5 +26,11 @@ namespace s3d::SpriteStudio
 
 		/// @brief パックに含まれるアニメーションデータ
 		Array<Animation> animations{};
+
+		/// @brief アニメーションパック名,アニメーション名からアニメーションを探します。
+		/// @param animationName アニメーション名
+		/// @return 見つかればアニメーションのポインタが返ります。 それ以外 nullptr
+		[[nodiscard]]
+		const Animation* const findAnimation(StringView animationName) const;
 	};
 }

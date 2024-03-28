@@ -1060,7 +1060,7 @@ namespace s3d::SpriteStudio::XMLParser
 				}
 				if (ParseAnimationSetting(child, overrideSetting))
 				{
-					out.overrideSetting = overrideSetting;
+					out.overrideSettingOpt = overrideSetting;
 					continue;
 				}
 				if (ParseAnimationLabels(child, out.labels))

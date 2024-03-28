@@ -55,6 +55,9 @@ namespace s3d::SpriteStudio
 		CircleScaleMax, ///< 真円の半径で距離により判定する (スケールはx,yの最大値をとる）
 	};
 
+	/// @brief 当たり判定用パラメータ
+	using BoundsValueVariant = std::variant<Quad, RectF, Circle>;
+
 	/// @brief 継承の種類
 	enum class InheritType
 	{

@@ -13,5 +13,10 @@ namespace s3d::SpriteStudio
 
 		/// @brief アトリビュートのキーフレーム
 		Array<AnimationKeyFrame> keyFrames{};
+
+		/// @brief 最初のキーデータを取得します。
+		/// @return データがあれば先頭のキーを返します。それ以外 nullptr
+		[[nodiscard]]
+		const AnimationKeyFrame* const getFirstKey() const noexcept;
 	};
 }

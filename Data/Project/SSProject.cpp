@@ -94,6 +94,12 @@ namespace s3d::SpriteStudio
 	}
 
 	//================================================================================
+	const ProjectSetting& Project::getProjectSetting() const noexcept
+	{
+		return m_setting;
+	}
+
+	//================================================================================
 	const Array<Cellmap>& Project::getCellmaps() const noexcept
 	{
 		return m_cellmaps;
@@ -109,6 +115,45 @@ namespace s3d::SpriteStudio
 	const ResourcePack& Project::getResourcePack() const noexcept
 	{
 		return m_resourcePack;
+	}
+
+	//================================================================================
+	const AnimationPack* const Project::findAnimationPack(StringView animationPackName) const
+	{
+		for (const auto& it : m_animationPacks)
+		{
+			if (it.name == animationPackName)
+			{
+				return &it;
+			}
+		}
+		return nullptr;
+	}
+
+	//================================================================================
+	const Animation* const Project::findAnimation(StringView animationPackName, StringView animationName) const
+	{
+		if (const auto* pAnimationPack = findAnimationPack(animationPackName))
+		{
+			return pAnimationPack->findAnimation(animationName);
+		}
+		return nullptr;
+	}
+
+	//================================================================================
+	const Cell* const Project::findCell(int32 mapId, StringView cellName) const noexcept
+	{
+		if (0 <= mapId and mapId < static_cast<int32>(m_cellmaps.size()))
+		{
+			for (const auto& cell : m_cellmaps[mapId].cells)
+			{
+				if (cell.name == cellName)
+				{
+					return &cell;
+				}
+			}
+		}
+		return nullptr;
 	}
 
 	//================================================================================
