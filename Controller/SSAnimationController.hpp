@@ -57,6 +57,22 @@ namespace s3d::SpriteStudio
 
 	private:
 
+		/// @brief セットアップパーツ、アニメーションパーツから最初にあるセル参照データを取得します。
+		/// @param pSetupPart セットアップパーツ
+		/// @param pAnimationPart アニメーションパーツ
+		/// @param out 出力先
+		/// @return セル参照データを見つけた場合は true を返します。それ以外 false
+		[[nodiscard]]
+		bool getFirstCellValue(const AnimationPart* pSetupPart, const AnimationPart* pAnimationPart, AttributeValueCell& out);
+
+		/// @brief セル参照データからセル情報、画像へのポインタを取得します。
+		/// @param refCell 検索する参照データ
+		/// @param pOutCell セル出力先
+		/// @param pOutTexture 画像出力先
+		/// @return セル、画像ともにポインタ設定できた場合は true を返します。それ以外 false
+		[[nodiscard]]
+		bool getCellTexture(const AttributeValueCell& refCell, const Cell* pOutCell, const Texture* pOutTexture);
+
 		/// @brief 指定アニメーションデータから各アニメーションパーツを作成します。
 		/// @param pProject プロジェクトの参照
 		/// @param pAnimationPack アニメーションパックの参照
@@ -81,6 +97,12 @@ namespace s3d::SpriteStudio
 		/// @param pPartState 更新するパーツ
 		/// @param frame 更新するフレーム
 		void updatePartState(AnimationPartState* pPartState, int32 frame);
+
+		/// @brief パーツの状態を指定フレームの前後キーフレームデータから補間計算を行います。
+		/// @param pPartState 更新するパーツ
+		/// @param attributes 参照するアトリビュート
+		/// @param frame 指定フレーム
+		void updatePartStateAttributes(AnimationPartState* pPartState, const Array<AnimationAttribute>& attributes, int32 frame);
 
 	private:
 
@@ -113,5 +135,14 @@ namespace s3d::SpriteStudio
 
 		/// @brief ボーンパーツリスト
 		Array<AnimationPartState*> m_bonePartStates;
+
+		/// @brief 非表示キーを見つけているか
+		bool m_isFoundKeyHide;
+
+		/// @brief サイズXキーを見つけているか
+		bool m_isFoundKeySizeX;
+
+		/// @brief サイズYキーを見つけているか
+		bool m_isFoundKeySizeY;
 	};
 }

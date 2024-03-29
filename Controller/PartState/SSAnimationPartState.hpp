@@ -127,6 +127,12 @@ namespace s3d::SpriteStudio
 		/// @brief 当たり判定用パラメータ
 		std::unique_ptr<BoundsValueVariant> pBoundsValue{ nullptr };
 
+		/// @brief 描画用参照画像
+		const Texture* pTexture{ nullptr };
+
+		/// @brief セル参照
+		const Cell* pCell{ nullptr };
+
 		/// @brief パーツごとに変わる値
 		AnimationPartStateValueVarint partValue{ std::monostate{} };
 	};

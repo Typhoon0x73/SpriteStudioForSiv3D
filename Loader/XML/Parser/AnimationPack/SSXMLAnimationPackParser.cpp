@@ -420,15 +420,15 @@ namespace s3d::SpriteStudio::XMLParser
 				return false;
 			}
 
-			out.m_startFrame = Parse<float>(lines[0]);
-			out.m_startValue = Parse<float>(lines[1]);
-			out.m_endFrame = Parse<float>(lines[2]);
-			out.m_endValue = Parse<float>(lines[3]);
+			out.startFrame = Parse<float>(lines[0]);
+			out.startValue = Parse<float>(lines[1]);
+			out.endFrame = Parse<float>(lines[2]);
+			out.endValue = Parse<float>(lines[3]);
 
-			DebugLog::Print(DebugLog::LogType::Verbose, U"startFrame:{}"_fmt(out.m_startFrame));
-			DebugLog::Print(DebugLog::LogType::Verbose, U"startValue:{}"_fmt(out.m_startValue));
-			DebugLog::Print(DebugLog::LogType::Verbose, U"endFrame  :{}"_fmt(out.m_endFrame));
-			DebugLog::Print(DebugLog::LogType::Verbose, U"endValue  :{}"_fmt(out.m_endValue));
+			DebugLog::Print(DebugLog::LogType::Verbose, U"startFrame:{}"_fmt(out.startFrame));
+			DebugLog::Print(DebugLog::LogType::Verbose, U"startValue:{}"_fmt(out.startValue));
+			DebugLog::Print(DebugLog::LogType::Verbose, U"endFrame  :{}"_fmt(out.endFrame));
+			DebugLog::Print(DebugLog::LogType::Verbose, U"endValue  :{}"_fmt(out.endValue));
 
 			return true;
 		}
@@ -917,8 +917,6 @@ namespace s3d::SpriteStudio::XMLParser
 			}
 			DebugLog::Print(DebugLog::LogType::Verbose, U"--- animation keyframes ---");
 
-			float easingRate = 1.0f;
-			AnimationCurve curve;
 			AnimationKeyFrame keyFrame;
 
 			// 補完できない,しないものは指定なしもある。
@@ -930,16 +928,13 @@ namespace s3d::SpriteStudio::XMLParser
 				DebugLog::Print(DebugLog::LogType::Error, U"キーフレームデータのフレームがありません。");
 				return false;
 			}
-			if (Utilities::AttributeToFloat(element, U"easingRate", easingRate))
-			{
-				keyFrame.easingRateOpt = easingRate;
-			}
+
+			Utilities::AttributeToFloat(element, U"easingRate", keyFrame.easingRate);
 
 			for (auto child = element.firstChild(); not(child.isNull()); child = child.nextSibling())
 			{
-				if (ParseAnimationCurve(child, curve))
+				if (ParseAnimationCurve(child, keyFrame.curve))
 				{
-					keyFrame.curveOpt = curve;
 					continue;
 				}
 				if (ParseAnimationKeyFrame(child, kind, keyFrame))

@@ -6,54 +6,19 @@ namespace s3d::SpriteStudio
 	namespace
 	{
 		//================================================================================
-		bool FindCellValue(const AnimationPartState* pPartState, AttributeValueCell& out)
-		{
-			const AnimationAttribute* pCellAttribute = nullptr;
-			if (pPartState->pSetupAnimationPart != nullptr)
-			{
-				pCellAttribute = pPartState->pSetupAnimationPart->findAttribute(AttributeKind::Cell);
-			}
-			// セットアップに無ければアニメーションから探す
-			if (pCellAttribute == nullptr
-				and pPartState->pAnimationPart != nullptr)
-			{
-				pCellAttribute = pPartState->pAnimationPart->findAttribute(AttributeKind::Cell);
-			}
-			if (pCellAttribute == nullptr)
-			{
-				// 参照セル情報がない。
-				return false;
-			}
-			const auto* pCellKeyFrame = pCellAttribute->getFirstKey();
-			if (pCellKeyFrame == nullptr)
-			{
-				// アトリビュートが空？？？
-				return false;
-			}
-			if (not(std::holds_alternative<AttributeValueCell>(pCellKeyFrame->attributeVariantValue)))
-			{
-				// セル情報ではない？？？
-				return false;
-			}
-			// データ取得。
-			out = std::get<AttributeValueCell>(pCellKeyFrame->attributeVariantValue);
-			return true;
-		}
-
-		//================================================================================
-		bool MakeMesh(AnimationPartStateMesh& out)
+		bool MakeMesh(const Cell* pCell, const Texture* pTexture, AnimationPartStateMesh& out)
 		{
 			if (
-				(out.pCell == nullptr)                       // セル情報からメッシュを生成するので無ければ無理。
-				or (not(out.pCell->meshInfoOpt.has_value())) // メッシュ情報無かったら作成できない。
-				or (out.pTexture == nullptr)                 // 画像データも欲しい。
+				(pCell == nullptr)                       // セル情報からメッシュを生成するので無ければ無理。
+				or (not(pCell->meshInfoOpt.has_value())) // メッシュ情報無かったら作成できない。
+				or (pTexture == nullptr)                 // 画像データも欲しい。
 				)
 			{
 				return false;
 			}
 
 			// メッシュ情報から作成する。
-			const auto& meshInfo = out.pCell->meshInfoOpt.value();
+			const auto& meshInfo = pCell->meshInfoOpt.value();
 			const auto& vertices = meshInfo.points;
 			const auto& indices = meshInfo.triangles;
 			const size_t vertexCount = vertices.size();
@@ -70,9 +35,9 @@ namespace s3d::SpriteStudio
 			out.bindBoneInfomations.resize(vertices.size());
 
 			// UV,座標計算
-			const auto& cellPos = out.pCell->rect.pos;
-			const auto& cellSize = out.pCell->rect.size;
-			const auto& cellPivot = out.pCell->pivot;
+			const auto& cellPos = pCell->rect.pos;
+			const auto& cellSize = pCell->rect.size;
+			const auto& cellPivot = pCell->pivot;
 			Float2 offs = Float2::Zero(); // 中央
 			offs.x = static_cast<float>(-cellSize.x * 0.5f);
 			offs.y = static_cast<float>(cellSize.y * 0.5f);
@@ -80,8 +45,8 @@ namespace s3d::SpriteStudio
 			offs.x -= cellPivot.x * cellSize.x;
 			offs.y -= cellPivot.y * cellSize.y;
 
-			const float uvPixelX = 1.0f / static_cast<float>(out.pTexture->width());
-			const float uvPixelY = 1.0f / static_cast<float>(out.pTexture->height());
+			const float uvPixelX = 1.0f / static_cast<float>(pTexture->width());
+			const float uvPixelY = 1.0f / static_cast<float>(pTexture->height());
 
 			for (const auto& it : vertices)
 			{
@@ -162,33 +127,7 @@ namespace s3d::SpriteStudio
 			{
 				partValueRaw = AnimationPartStateMesh();
 				auto& valueRaw = std::get<AnimationPartStateMesh>(partValueRaw);
-				// セルを探す
-				AttributeValueCell cellValue;
-				if (not(FindCellValue(pOutPartState, cellValue)))
-				{
-					// セル情報が見つからない？？？
-					return false;
-				}
-				// セルマップから画像を探す
-				const auto& cellmaps = pProject->getCellmaps();
-				if (cellValue.mapId < 0 or static_cast<int32>(cellmaps.size()) <= cellValue.mapId)
-				{
-					// セルマップ配列の境界外。
-					return false;
-				}
-				const auto& cellmapName = cellmaps[cellValue.mapId].name;
-				const auto& resourcePack = pProject->getResourcePack();
-				const auto& cellmapTextureTable = resourcePack.cellmapTextureTable;
-				const auto& cellmapTextureItr = cellmapTextureTable.find(cellmapName);
-				if (cellmapTextureTable.end() == cellmapTextureItr)
-				{
-					// 画像データが見つからなかった。
-					return false;
-				}
-				// セル、画像を設定してメッシュを作成する。
-				valueRaw.pCell = pProject->findCell(cellValue.mapId, cellValue.name);
-				valueRaw.pTexture = &(cellmapTextureItr->second);
-				if (not(MakeMesh(valueRaw)))
+				if (not(MakeMesh(pOutPartState->pCell, pOutPartState->pTexture, valueRaw)))
 				{
 					// メッシュを作成できなかった。
 					return false;
@@ -240,7 +179,7 @@ namespace s3d::SpriteStudio
 
 
 	//================================================================================
-	AnimationPartState* AnimationPartStateBuilder::Build(const Project* pProject, const AnimationModelPart* pModelPart, const AnimationPart* pSetupPart, const AnimationPart* pAnimationPart)
+	AnimationPartState* AnimationPartStateBuilder::Build(const Project* pProject, const AnimationModelPart* pModelPart, const AnimationPart* pSetupPart, const AnimationPart* pAnimationPart, const Cell* pCell, const Texture* pTexture)
 	{
 		// モデルパーツがnullptrということはありえない。
 		// プロジェクトデータがない場合は作成できないものがある。
@@ -252,6 +191,8 @@ namespace s3d::SpriteStudio
 		pState->pAnimationModelPart = pModelPart;
 		pState->pSetupAnimationPart = pSetupPart; // nullptrの場合もある
 		pState->pAnimationPart = pAnimationPart;  // nullptrの場合もある
+		pState->pCell = pCell;
+		pState->pTexture = pTexture;
 
 		// アルファ値の継承率を設定
 		pState->alphaInheritRate = pModelPart->alphaIheritRate;

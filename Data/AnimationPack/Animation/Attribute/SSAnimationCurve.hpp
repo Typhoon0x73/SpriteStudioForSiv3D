@@ -7,15 +7,15 @@ namespace s3d::SpriteStudio
 	struct AnimationCurve
 	{
 		/// @brief 始点キーの時間から制御点の時間へのオフセット値。X軸に当たる。
-		float m_startFrame{ 0.0f };
+		float startFrame{ 0.0f };
 
 		/// @brief 始点キーの値から制御点の時間へのオフセット値。Y軸に当たる。
-		float m_startValue{ 0.0f };
+		float startValue{ 0.0f };
 
 		/// @brief 終点キーの時間から制御点の時間へのオフセット値。X軸に当たる。
-		float m_endFrame{ 0.0f };
+		float endFrame{ 0.0f };
 
 		/// @brief 終点キーの値から制御点の時間へのオフセット値。Y軸に当たる。
-		float m_endValue{ 0.0f };
+		float endValue{ 0.0f };
 	};
 }

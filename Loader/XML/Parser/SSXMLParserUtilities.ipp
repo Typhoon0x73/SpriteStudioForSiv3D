@@ -1,4 +1,5 @@
 ﻿
+//================================================================================
 template< class T, size_t N >
 inline bool TextToEnum(const XMLElement& element, StringView name, const std::array<std::pair<const char32_t*, T>, N>& table, T& out)
 {
