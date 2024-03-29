@@ -400,8 +400,8 @@ namespace s3d::SpriteStudio
 		const auto* pAnimationPart = pPartState->pAnimationPart;
 		const bool existParent = (pParent != nullptr);
 		const bool existSetupPart = (pSetupPart != nullptr);
-		const bool existAnimationPart = (pAnimationPart == nullptr);
-		const bool existModelPart = not(pModelPart == nullptr);
+		const bool existAnimationPart = (pAnimationPart != nullptr);
+		const bool existModelPart = (pModelPart != nullptr);
 
 		// セットアップもアニメーションも無ければ表示しないフラグを立てる。
 		if (not(existSetupPart) and not(existAnimationPart))
