@@ -464,6 +464,62 @@ namespace s3d::SpriteStudio
 	//================================================================================
 	void AnimationController::initPartState(AnimationPartState* pPartState)
 	{
+		pPartState->modelMatrix = Mat4x4::Identity();
+		pPartState->localModelMatrix = Mat4x4::Identity();
+
+		pPartState->position = Float3::Zero();
+		pPartState->rotation = Float3::Zero();
+		pPartState->scale = Float2::One();
+		pPartState->localScale = Float2::One();
+
+		pPartState->alpha = 1.0f;
+		pPartState->localAlpha = 1.0f;
+
+		pPartState->priority = 0;
+		pPartState->isHide = false;
+
+		pPartState->pivotOffset = Float2::One();
+		pPartState->size = Float2::One();
+
+		pPartState->isImageFlipHorizontal = false;
+		pPartState->isImageFlipVertical = false;
+
+		pPartState->uvTranslate = Float2::Zero();
+		pPartState->uvRotation = 0.0f;
+		pPartState->uvScale = Float2::Zero();
+
+		pPartState->boundingRadius = 0.0f;
+		pPartState->maskThreshold = 0;
+
+		pPartState->usePartsColor = false;
+		pPartState->useShader = false;
+		pPartState->useVertexTrans = false;
+		pPartState->useLocalAlpha = false;
+		pPartState->useLocalScale = false;
+		pPartState->useDeform = false;
+
+		auto& effectParamRaw = pPartState->effectParam;
+		effectParamRaw.isIndependent = false;
+		effectParamRaw.speed = 1.0f;
+		effectParamRaw.startTime = 0;
+		effectParamRaw.currentKeyFrame = 0;
+		pPartState->effectSeed = 0;
+		pPartState->effectTime = 0;
+
+		auto& instanceParamRaw = pPartState->instanceParam;
+		instanceParamRaw.isInfinity = false;
+		instanceParamRaw.isReverse = false;
+		instanceParamRaw.isPingPong = false;
+		instanceParamRaw.isIndependent = false;
+		instanceParamRaw.loopNum = 1;
+		instanceParamRaw.startLabel = U"_start";
+		instanceParamRaw.startOffset = 0;
+		instanceParamRaw.endLabel = U"_end";
+		instanceParamRaw.endOffset = 0;
+		instanceParamRaw.curKeyframe = 0;
+		instanceParamRaw.speed = 1.0f;
+		instanceParamRaw.startFrame = 0;
+		instanceParamRaw.endFrame = 0;
 	}
 
 	//================================================================================
@@ -485,19 +541,34 @@ namespace s3d::SpriteStudio
 		const bool existAnimationPart = (pAnimationPart != nullptr);
 		const bool existModelPart = (pModelPart != nullptr);
 
-		// セットアップもアニメーションも無ければ表示しないフラグを立てる。
+		// 初期化しておく
+		initPartState(pPartState);
+
+		// シェイプのサイズを設定
+		if (existModelPart and pModelPart->partType == PartType::Shape)
+		{
+			pPartState->size = Float2{ 64.0f, 64.0f };
+		}
+
+		// セットアップもアニメーションも無ければ表示しないフラグを立ててマトリクス初期化しておわる。
 		if (not(existSetupPart) and not(existAnimationPart))
 		{
 			pPartState->isHide = true;
+			return;
 		}
 
-		// 初期化しておく
-		initPartState(pPartState);
+		// 親の継承設定を引用する設定の場合、ここで親のものに変えておく。
+		if (existModelPart and pModelPart->inheritType == InheritType::Parent)
+		{
+			if (existParent)
+			{
+				pPartState->alphaInheritRate = pParent->alphaInheritRate;
+			}
+		}
 
 		m_isFoundKeyHide = false;
 		m_isFoundKeySizeX = false;
 		m_isFoundKeySizeY = false;
-
 
 		// ボーンパーツであればボーン値で初期化する。
 		if (existModelPart
@@ -520,6 +591,62 @@ namespace s3d::SpriteStudio
 		{
 			updatePartStateAttributes(pPartState, pAnimationPart->attributes, frame);
 		}
+
+		// 非表示キーがないか、先頭の非表示キーより手前の場合は常に非表示にする。
+		if (not(m_isFoundKeyHide))
+		{
+			pPartState->isHide = true;
+		}
+
+		// 継承
+		{
+			if (existParent)
+			{
+				const float alphaInheritRate = pPartState->alphaInheritRate;
+				if (0.0f < alphaInheritRate)
+				{
+					pPartState->alpha *= (pParent->alpha * alphaInheritRate);
+				}
+
+				// 親がインスタンスパーツでかつ非表示フラグがある場合は非表示にする。
+				if (m_isInstancePartsHide)
+				{
+					pPartState->isHide = true;
+				}
+			}
+		}
+
+		// 頂点の設定
+		if (existModelPart)
+		{
+			const auto& partType = pModelPart->partType;
+			if (partType == PartType::Normal
+				or partType == PartType::Mask
+				or partType == PartType::Text
+				)
+			{
+				if (pPartState->pCell != nullptr
+					and (existAnimationPart or existSetupPart))
+				{
+					if (not(m_isFoundKeySizeX))
+					{
+						pPartState->size.x = pPartState->pCell->rect.size.x;
+					}
+					if (not(m_isFoundKeySizeY))
+					{
+						pPartState->size.y = pPartState->pCell->rect.size.y;
+					}
+				}
+				updateVertices(pPartState, pModelPart, pAnimationPart);
+			}
+
+			if (partType == PartType::Nineslice
+				or partType == PartType::Shape
+				)
+			{
+				updateVertices(pPartState, pModelPart, pAnimationPart);
+			}
+		}
 	}
 
 	//================================================================================
@@ -531,8 +658,8 @@ namespace s3d::SpriteStudio
 			return;
 		}
 
-		// ローカル変数のほうがアクセスが早いのでキャッシュ
-		int32 currentFrame = frame;
+		// ローカル変数にキャッシュ
+		const int32 currentFrame = frame;
 
 		// キーが見つからなかった時にセットアップパーツの情報が欲しいのでキャッシュしておく。
 		const auto* pSetupPart = pPartState->pSetupAnimationPart;
@@ -599,11 +726,13 @@ namespace s3d::SpriteStudio
 			case AttributeKind::LocalScaleX:
 			{
 				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->localScale.x);
+				pPartState->useLocalScale = true;
 				break;
 			}
 			case AttributeKind::LocalScaleY:
 			{
 				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->localScale.y);
+				pPartState->useLocalScale = true;
 				break;
 			}
 			case AttributeKind::Alpha:
@@ -614,6 +743,7 @@ namespace s3d::SpriteStudio
 			case AttributeKind::LocalAlpha:
 			{
 				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->localAlpha);
+				pPartState->useLocalAlpha = true;
 				break;
 			}
 			case AttributeKind::Priority:
@@ -638,9 +768,23 @@ namespace s3d::SpriteStudio
 				break;
 			}
 			case AttributeKind::PartsColor:
-			case AttributeKind::Shader:
-			case AttributeKind::Vertex:
+			{
+				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->partsColor);
+				pPartState->usePartsColor = true;
 				break;
+			}
+			case AttributeKind::Shader:
+			{
+				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->shaderParam);
+				pPartState->useShader = true;
+				break;
+			}
+			case AttributeKind::Vertex:
+			{
+				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->vertexTrans);
+				pPartState->useVertexTrans = true;
+				break;
+			}
 			case AttributeKind::PivotX:
 			{
 				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->pivotOffset.x);
@@ -709,13 +853,62 @@ namespace s3d::SpriteStudio
 				break;
 			}
 			case AttributeKind::User:
-			case AttributeKind::Signal:
-			case AttributeKind::InstanceParam:
-			case AttributeKind::Effect:
-			case AttributeKind::Deform:
-			case AttributeKind::Audio:
-			case AttributeKind::TextureChange:
+			{
+				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->userParam);
 				break;
+			}
+			case AttributeKind::Signal:
+			{
+				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->signalParam);
+				break;
+			}
+			case AttributeKind::InstanceParam:
+			{
+				int32 useFrame = Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->instanceParam);
+				// 先頭にキーがない場合は初期値を入れておく。
+				if (currentFrame < useFrame)
+				{
+					pPartState->instanceParam = AttributeValueInstance();
+				}
+				break;
+			}
+			case AttributeKind::Effect:
+			{
+				int32 useFrame = Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->effectParam);
+
+				// 先頭にキーがない場合は初期値を入れておく。
+				if (currentFrame < useFrame)
+				{
+					pPartState->effectParam = AttributeValueEffect();
+				}
+				else
+				{
+					pPartState->effectTime = useFrame;
+					// 初回のみ初期化
+					if (not(pPartState->effectParam.isAttributeInitialized))
+					{
+						pPartState->effectParam.isAttributeInitialized = true;
+						pPartState->effectTimeTotal = static_cast<float>(pPartState->effectParam.startTime);
+					}
+				}
+				break;
+			}
+			case AttributeKind::Deform:
+			{
+				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->deformParam);
+				pPartState->useDeform = true;
+				break;
+			}
+			case AttributeKind::Audio:
+			{
+				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->audioParam);
+				break;
+			}
+			case AttributeKind::TextureChange:
+			{
+				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->textureChangeParam);
+				break;
+			}
 
 				// 非対応
 			case AttributeKind::FlipH:
@@ -728,6 +921,37 @@ namespace s3d::SpriteStudio
 			default:
 				break;
 			}
+		}
+	}
+
+	//================================================================================
+	void AnimationController::updateVertices(AnimationPartState* pPartState, const AnimationModelPart* pModelPart, const AnimationPart* pAnimationPart)
+	{
+		if (pModelPart == nullptr
+			or pPartState == nullptr)
+		{
+			return;
+		}
+
+		const Cell* pCell = pPartState->pCell;
+		const auto& partType = pModelPart->partType;
+
+		if (partType == PartType::Shape)
+		{
+			pCell = nullptr;
+		}
+		if (partType == PartType::Text)
+		{
+
+		}
+		if (partType == PartType::Nineslice)
+		{
+
+		}
+
+		if (pCell != nullptr)
+		{
+
 		}
 	}
 

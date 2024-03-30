@@ -17,11 +17,41 @@ namespace s3d::SpriteStudio::Utilities
 	/// @return 補間結果
 	float Interpolation(InterpolationType type, float easingRate, float nowRate, float leftValue, float rightValue, const AnimationCurve& curve, float startKeyFrame, float endKeyFrame);
 
-	/// @brief セル値補間特殊化
+	/// @brief セル値補間（左キー採用）
 	void InterpolationValue([[maybe_unused]] int32 frame, const AnimationKeyFrame* pLeft, [[maybe_unused]] const AnimationKeyFrame* pRight, AttributeValueCell& out);
 
+	/// @brief パーツカラー値補間
+	void InterpolationValue(int32 frame, const AnimationKeyFrame* pLeft, const AnimationKeyFrame* pRight, AttributeValuePartsColor& out);
+	
+	/// @brief シェーダーカラー値補間
+	void InterpolationValue(int32 frame, const AnimationKeyFrame* pLeft, const AnimationKeyFrame* pRight, AttributeValueShader& out);
+
+	/// @brief 頂点変形値補間
+	void InterpolationValue(int32 frame, const AnimationKeyFrame* pLeft, const AnimationKeyFrame* pRight, AttributeValueVertexTranslate& out);
+
+	/// @brief ユーザーデータ値補間（左キー採用）
+	void InterpolationValue([[maybe_unused]] int32 frame, const AnimationKeyFrame* pLeft, [[maybe_unused]] const AnimationKeyFrame* pRight, AttributeValueUser& out);
+
+	/// @brief シグナル値補間（左キー採用）
+	void InterpolationValue([[maybe_unused]] int32 frame, const AnimationKeyFrame* pLeft, [[maybe_unused]] const AnimationKeyFrame* pRight, AttributeValueSignal& out);
+
+	/// @brief インスタンス値補間（左キー採用）
+	void InterpolationValue([[maybe_unused]] int32 frame, const AnimationKeyFrame* pLeft, [[maybe_unused]] const AnimationKeyFrame* pRight, AttributeValueInstance& out);
+
+	/// @brief エフェクト値補間（左キー採用）
+	void InterpolationValue([[maybe_unused]] int32 frame, const AnimationKeyFrame* pLeft, [[maybe_unused]] const AnimationKeyFrame* pRight, AttributeValueEffect& out);
+
+	/// @brief サウンド値補間（左キー採用）
+	void InterpolationValue([[maybe_unused]] int32 frame, const AnimationKeyFrame* pLeft, [[maybe_unused]] const AnimationKeyFrame* pRight, AttributeValueAudio& out);
+
+	/// @brief 画像切り替え値補間（左キー採用）
+	void InterpolationValue([[maybe_unused]] int32 frame, const AnimationKeyFrame* pLeft, [[maybe_unused]] const AnimationKeyFrame* pRight, AttributeValueTextureChange& out);
+
+	/// @brief デフォーム値補間
+	void InterpolationValue(int32 frame, const AnimationKeyFrame* pLeft, const AnimationKeyFrame* pRight, AttributeValueDeform& out);
+
 	/// @brief 指定フレームの左右キーフレームデータから補完します。
-	/// @tparam T float, int32, boolはこの関数を利用。その他は特殊化対応。
+	/// @tparam T float, int32, boolはこの関数を利用。その他は別関数実装。
 	/// @param frame 指定フレーム
 	/// @param pLeft 左キーフレーム値
 	/// @param pRight 右キーフレーム値

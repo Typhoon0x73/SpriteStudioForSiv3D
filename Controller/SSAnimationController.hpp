@@ -104,7 +104,13 @@ namespace s3d::SpriteStudio
 		/// @param frame 指定フレーム
 		void updatePartStateAttributes(AnimationPartState* pPartState, const Array<AnimationAttribute>& attributes, int32 frame);
 
-	private:
+		/// @brief 頂点を更新します。
+		/// @param pPartState 更新するパーツ
+		/// @param pModelPart モデルパーツ
+		/// @param pAnimationPart アニメーションパーツ
+		void updateVertices(AnimationPartState* pPartState, const AnimationModelPart* pModelPart, const AnimationPart* pAnimationPart);
+
+private:
 
 		/// @brief プロジェクトデータの参照
 		const Project* m_pProject;
@@ -144,5 +150,8 @@ namespace s3d::SpriteStudio
 
 		/// @brief サイズYキーを見つけているか
 		bool m_isFoundKeySizeY;
+
+		/// @brief インスタンスパーツ用の非表示フラグ
+		bool m_isInstancePartsHide;
 	};
 }

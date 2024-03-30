@@ -106,6 +106,18 @@ namespace s3d::SpriteStudio
 		/// @brief エフェクト値
 		AttributeValueEffect effectParam{};
 
+		/// @brief エフェクトシード値
+		int32 effectSeed{ 0 };
+
+		/// @brief 
+		int32 effectTime{ 0 };
+
+		/// @brief 
+		float effectTimeTotal{ 0.0f };
+
+		/// @brief ユーザーデータ値
+		AttributeValueUser userParam{};
+
 		/// @brief シグナル値
 		AttributeValueSignal signalParam{};
 
@@ -126,6 +138,24 @@ namespace s3d::SpriteStudio
 
 		/// @brief 当たり判定用パラメータ
 		std::unique_ptr<BoundsValueVariant> pBoundsValue{ nullptr };
+
+		/// @brief パーツカラーを使用するフラグ
+		bool usePartsColor{ false };
+
+		/// @brief シェーダーを使用するフラグ
+		bool useShader{ false };
+
+		/// @brief 頂点変形を使用するフラグ
+		bool useVertexTrans{ false };
+
+		/// @brief ローカルアルファ値を使用するフラグ
+		bool useLocalAlpha{ false };
+
+		/// @brief ローカルスケールを使用するフラグ
+		bool useLocalScale{ false };
+
+		/// @brief デフォーム値を使用するフラグ
+		bool useDeform{ false };
 
 		/// @brief 描画用参照画像
 		const Texture* pTexture{ nullptr };
