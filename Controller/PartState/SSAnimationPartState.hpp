@@ -2,7 +2,7 @@
 #include <Siv3D.hpp>
 #include "../../Data/AnimationPack/Model/SSAnimationModelPart.hpp"
 #include "../../Data/AnimationPack/Animation/SSAnimationPart.hpp"
-#include "SSAnimationPartStateNormal.hpp"
+#include "../../Data/Cellmap/SSCellmap.hpp"
 #include "SSAnimationPartStateInstance.hpp"
 #include "SSAnimationPartStateMesh.hpp"
 
@@ -11,10 +11,17 @@ namespace s3d::SpriteStudio
 	/// @brief パーツごとに変わる値
 	using AnimationPartStateValueVarint = std::variant<
 		std::monostate
-		, AnimationPartStateNormal
 		, AnimationPartStateInstance
 		, AnimationPartStateMesh
 	>;
+
+	/// @brief セルマップ、画像をまとめて扱う構造体
+	struct CellmapTextureInfo
+	{
+		const Cell* pCell{ nullptr };
+		const Cellmap* pCellmap{ nullptr };
+		const Texture* pTexture{ nullptr };
+	};
 
 	/// @brief アニメーションパーツの状態
 	struct AnimationPartState
@@ -30,6 +37,9 @@ namespace s3d::SpriteStudio
 
 		/// @brief アニメーションパーツへのポインタ
 		const AnimationPart* pAnimationPart{ nullptr };
+
+		/// @brief 描画用バッファ
+		std::unique_ptr<Buffer2D> pBuffer2D{ nullptr };
 
 		/// @brief パーツのモデルマトリックス
 		Mat4x4 modelMatrix{ Mat4x4::Identity() };
@@ -157,13 +167,28 @@ namespace s3d::SpriteStudio
 		/// @brief デフォーム値を使用するフラグ
 		bool useDeform{ false };
 
-		/// @brief 描画用参照画像
-		const Texture* pTexture{ nullptr };
-
-		/// @brief セル参照
-		const Cell* pCell{ nullptr };
+		/// @brief 描画用参照セル、画像
+		CellmapTextureInfo cellmapTextureInfo{};
 
 		/// @brief パーツごとに変わる値
 		AnimationPartStateValueVarint partValue{ std::monostate{} };
+
+		/// @brief ワールドマトリクスを取得します。
+		/// @return ローカル影響値ありでlocalModelMatrixを返します。 それ以外 modelMatrix
+		const Mat4x4& getWorldMatrix() const;
+
+		/// @brief ワールドマトリクスを取得します。
+		/// @return ローカル影響値ありでlocalModelMatrixを返します。 それ以外 modelMatrix
+		Mat4x4& getWorldMatrixRaw();
+
+		/// @brief 頂点を更新します。
+		void updateVertices();
+
+		/// @brief 当たり判定を更新します。
+		void updateBounds();
+
+		/// @brief マトリクスを更新します。
+		void updateMatrix();
+
 	};
 }

@@ -19,9 +19,10 @@ namespace s3d::SpriteStudio
 		/// @param pSetupPart セットアップアニメーションパーツ
 		/// @param pAnimationPart アニメーションパーツ
 		/// @param pCell セル参照
+		/// @param pCellmap セルマップ参照
 		/// @param pTexture 画像参照
 		/// @return 構築が成功すれば、newされたインスタンスが返ります。 それ以外 nullptr
 		[[nodiscard]]
-		static AnimationPartState* Build(const Project* pProject, const AnimationModelPart* pModelPart, const AnimationPart* pSetupPart, const AnimationPart* pAnimationPart, const Cell* pCell, const Texture* pTexture);
+		static AnimationPartState* Build(const Project* pProject, const AnimationModelPart* pModelPart, const AnimationPart* pSetupPart, const AnimationPart* pAnimationPart, const CellmapTextureInfo& cellmapTextureInfo);
 	};
 }

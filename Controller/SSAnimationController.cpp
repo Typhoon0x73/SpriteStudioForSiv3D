@@ -4,6 +4,59 @@
 
 namespace s3d::SpriteStudio
 {
+
+	//================================================================================
+	int32 AnimationController::FindAnimationLabelToFrame(const Animation* pAnimation, StringView label)
+	{
+		for (const auto& it : pAnimation->labels)
+		{
+			if (label == it.name)
+			{
+				return it.frame;
+			}
+		}
+		return -1;
+	}
+
+	//================================================================================
+	int32 AnimationController::AnimationLabelToFrame(StringView label, int32 offset, const Animation* pAnimation, const AnimationSetting* pSetting)
+	{
+		if (pSetting == nullptr)
+		{
+			return 0;
+		}
+
+		const int32 startFrame = pSetting->startFrame;
+		const int32 endFrame = pSetting->endFrame;
+		int32 ret = offset;
+
+		if (label == U"_start")
+		{
+			ret = startFrame + offset;
+		}
+		else if (label == U"_end")
+		{
+			ret = endFrame + offset;
+		}
+		else if (label == U"none")
+		{
+			return ret;
+		}
+		else
+		{
+			int32 findFrame = FindAnimationLabelToFrame(pAnimation, label);
+
+			if (findFrame < 0)
+			{
+				return ret;
+			}
+			ret = Clamp(findFrame + offset, startFrame, endFrame);
+			return ret;
+		}
+
+		return Clamp(ret, startFrame, endFrame);
+	}
+
 	//================================================================================
 	AnimationController::AnimationController()
 		: m_pProject{ nullptr }
@@ -11,6 +64,7 @@ namespace s3d::SpriteStudio
 		, m_pCurrentAnimation{ nullptr }
 		, m_pAnimationSetting{ nullptr }
 		, m_frame{ 0 }
+		, m_prevFrame{ 0 }
 		, m_isNeedApply{ false }
 		, m_partStates{}
 		, m_sortPartStates{}
@@ -128,6 +182,7 @@ namespace s3d::SpriteStudio
 		partsSort();
 
 		// 初期状態を更新しておく
+		m_isNeedApply = true;
 		setFrame(m_pAnimationSetting->startFrame);
 		apply();
 
@@ -166,6 +221,7 @@ namespace s3d::SpriteStudio
 		{
 			return;
 		}
+		m_prevFrame = m_frame;
 		m_frame = frame;
 		m_isNeedApply = true;
 	}
@@ -196,9 +252,49 @@ namespace s3d::SpriteStudio
 	}
 
 	//================================================================================
+	int32 AnimationController::getFPS() const noexcept
+	{
+		if (m_pAnimationSetting == nullptr)
+		{
+			return 0;
+		}
+		return m_pAnimationSetting->fps;
+	}
+
+	//================================================================================
 	Array<std::unique_ptr<AnimationPartState>>& AnimationController::getPartStatesRaw() noexcept
 	{
 		return m_partStates;
+	}
+
+	//================================================================================
+	const Array<std::unique_ptr<AnimationPartState>>& AnimationController::getPartStates() const noexcept
+	{
+		return m_partStates;
+	}
+
+	//================================================================================
+	const Project* const AnimationController::getProject() const noexcept
+	{
+		return m_pProject;
+	}
+
+	//================================================================================
+	const AnimationPack* const AnimationController::getCurrentAnimationPack() const noexcept
+	{
+		return m_pCurrentAnimationPack;
+	}
+
+	//================================================================================
+	const Animation* const AnimationController::getCurrentAnimation() const noexcept
+	{
+		return m_pCurrentAnimation;
+	}
+
+	//================================================================================
+	const AnimationSetting* const AnimationController::getAnimationSetting() const noexcept
+	{
+		return m_pAnimationSetting;
 	}
 
 	//================================================================================
@@ -237,22 +333,22 @@ namespace s3d::SpriteStudio
 	}
 
 	//================================================================================
-	bool AnimationController::getCellTexture(const AttributeValueCell& refCell, const Cell* pOutCell, const Texture* pOutTexture)
+	bool AnimationController::getCellTexture(const Project* pProject, const AttributeValueCell& refCell, CellmapTextureInfo& pOut)
 	{
 		// プロジェクトデータがなければ設定できない。
-		if (m_pProject == nullptr)
+		if (pProject == nullptr)
 		{
 			return false;
 		}
 		// セルマップから画像を探す
-		const auto& cellmaps = m_pProject->getCellmaps();
+		const auto& cellmaps = pProject->getCellmaps();
 		if (refCell.mapId < 0 or static_cast<int32>(cellmaps.size()) <= refCell.mapId)
 		{
 			// セルマップ配列の境界外。
 			return false;
 		}
 		const auto& cellmapName = cellmaps[refCell.mapId].name;
-		const auto& resourcePack = m_pProject->getResourcePack();
+		const auto& resourcePack = pProject->getResourcePack();
 		const auto& cellmapTextureTable = resourcePack.cellmapTextureTable;
 		const auto& cellmapTextureItr = cellmapTextureTable.find(cellmapName);
 		if (cellmapTextureTable.end() == cellmapTextureItr)
@@ -261,8 +357,9 @@ namespace s3d::SpriteStudio
 			return false;
 		}
 		// セル、画像を設定する。
-		pOutCell = m_pProject->findCell(refCell.mapId, refCell.name);
-		pOutTexture = &(cellmapTextureItr->second);
+		pOut.pCellmap = pProject->getCellmap(refCell.mapId);
+		pOut.pCell = pProject->findCell(refCell.mapId, refCell.name);
+		pOut.pTexture = &(cellmapTextureItr->second);
 		return true;
 	}
 
@@ -288,23 +385,22 @@ namespace s3d::SpriteStudio
 		{
 			const AnimationModelPart* pModelPart = &(modelParts[i]);
 			const StringView partName = pModelPart->name;
-			const AnimationPart* pSetupPart = pSetupAnimation->findAnimationPart(partName);
-			const AnimationPart* pAnimationPart = pAnimation->findAnimationPart(partName);
+			const AnimationPart* pSetupPart = ((pSetupAnimation != nullptr) ? pSetupAnimation->findAnimationPart(partName) : nullptr);
+			const AnimationPart* pAnimationPart = ((pAnimation != nullptr) ? pAnimation->findAnimationPart(partName) : nullptr);
 
 			// セルを探す
 			AttributeValueCell cellValue;
-			Cell* pCell = nullptr;
-			Texture* pTexture = nullptr;
+			CellmapTextureInfo cellmapTextureInfo;
 			if (getFirstCellValue(pSetupPart, pAnimationPart, cellValue))
 			{
-				if (not(getCellTexture(cellValue, pCell, pTexture)))
+				if (not(getCellTexture(pProject, cellValue, cellmapTextureInfo)))
 				{
 					// セル値見つけたけど、画像とセルが設定できない。
 					return false;
 				}
 			}
 
-			AnimationPartState* pStateRaw = AnimationPartStateBuilder::Build(pProject, pModelPart, pSetupPart, pAnimationPart, pCell, pTexture);
+			AnimationPartState* pStateRaw = AnimationPartStateBuilder::Build(pProject, pModelPart, pSetupPart, pAnimationPart, cellmapTextureInfo);
 			if (pStateRaw == nullptr)
 			{
 				// パーツの作成に失敗。
@@ -427,7 +523,7 @@ namespace s3d::SpriteStudio
 			}
 			auto& meshPartStateValue = std::get<AnimationPartStateMesh>(m_meshPartStates[i]->partValue);
 			auto& bindBoneInfoRaw = meshPartStateValue.bindBoneInfomations;
-			const size_t meshVertexCount = meshPartStateValue.buffer2D.vertices.size();
+			const size_t meshVertexCount = m_meshPartStates[i]->pBuffer2D->vertices.size();
 
 			// モデルデータからメッシュパーツのパラメータへ反映する。
 			const auto& modelBindInfomationsArray = meshBind.vertexBinds;
@@ -462,7 +558,7 @@ namespace s3d::SpriteStudio
 	}
 
 	//================================================================================
-	void AnimationController::initPartState(AnimationPartState* pPartState)
+	void AnimationController::initState(AnimationPartState* pPartState)
 	{
 		pPartState->modelMatrix = Mat4x4::Identity();
 		pPartState->localModelMatrix = Mat4x4::Identity();
@@ -486,7 +582,7 @@ namespace s3d::SpriteStudio
 
 		pPartState->uvTranslate = Float2::Zero();
 		pPartState->uvRotation = 0.0f;
-		pPartState->uvScale = Float2::Zero();
+		pPartState->uvScale = Float2::One();
 
 		pPartState->boundingRadius = 0.0f;
 		pPartState->maskThreshold = 0;
@@ -520,6 +616,10 @@ namespace s3d::SpriteStudio
 		instanceParamRaw.speed = 1.0f;
 		instanceParamRaw.startFrame = 0;
 		instanceParamRaw.endFrame = 0;
+
+		m_isFoundKeyHide = false;
+		m_isFoundKeySizeX = false;
+		m_isFoundKeySizeY = false;
 	}
 
 	//================================================================================
@@ -542,7 +642,7 @@ namespace s3d::SpriteStudio
 		const bool existModelPart = (pModelPart != nullptr);
 
 		// 初期化しておく
-		initPartState(pPartState);
+		initState(pPartState);
 
 		// シェイプのサイズを設定
 		if (existModelPart and pModelPart->partType == PartType::Shape)
@@ -550,7 +650,7 @@ namespace s3d::SpriteStudio
 			pPartState->size = Float2{ 64.0f, 64.0f };
 		}
 
-		// セットアップもアニメーションも無ければ表示しないフラグを立ててマトリクス初期化しておわる。
+		// セットアップもアニメーションも無ければ表示しないフラグを立てておわる。
 		if (not(existSetupPart) and not(existAnimationPart))
 		{
 			pPartState->isHide = true;
@@ -565,10 +665,6 @@ namespace s3d::SpriteStudio
 				pPartState->alphaInheritRate = pParent->alphaInheritRate;
 			}
 		}
-
-		m_isFoundKeyHide = false;
-		m_isFoundKeySizeX = false;
-		m_isFoundKeySizeY = false;
 
 		// ボーンパーツであればボーン値で初期化する。
 		if (existModelPart
@@ -591,6 +687,9 @@ namespace s3d::SpriteStudio
 		{
 			updatePartStateAttributes(pPartState, pAnimationPart->attributes, frame);
 		}
+
+		// マトリクスの更新。
+		pPartState->updateMatrix();
 
 		// 非表示キーがないか、先頭の非表示キーより手前の場合は常に非表示にする。
 		if (not(m_isFoundKeyHide))
@@ -616,35 +715,54 @@ namespace s3d::SpriteStudio
 			}
 		}
 
-		// 頂点の設定
 		if (existModelPart)
 		{
 			const auto& partType = pModelPart->partType;
+
+			// 頂点の設定
 			if (partType == PartType::Normal
 				or partType == PartType::Mask
 				or partType == PartType::Text
 				)
 			{
-				if (pPartState->pCell != nullptr
+				if (pPartState->cellmapTextureInfo.pCell != nullptr
 					and (existAnimationPart or existSetupPart))
 				{
 					if (not(m_isFoundKeySizeX))
 					{
-						pPartState->size.x = pPartState->pCell->rect.size.x;
+						pPartState->size.x = static_cast<float>(pPartState->cellmapTextureInfo.pCell->rect.size.x);
 					}
 					if (not(m_isFoundKeySizeY))
 					{
-						pPartState->size.y = pPartState->pCell->rect.size.y;
+						pPartState->size.y = static_cast<float>(pPartState->cellmapTextureInfo.pCell->rect.size.y);
 					}
 				}
-				updateVertices(pPartState, pModelPart, pAnimationPart);
+				pPartState->updateVertices();
 			}
 
 			if (partType == PartType::Nineslice
 				or partType == PartType::Shape
 				)
 			{
-				updateVertices(pPartState, pModelPart, pAnimationPart);
+				pPartState->updateVertices();
+			}
+
+			// インスタンスパーツの更新
+			if (partType == PartType::Instance)
+			{
+				updateInstance(pPartState, frame);
+				pPartState->updateVertices();
+			}
+
+			// エフェクトパーツの更新
+			if (partType == PartType::Effect)
+			{
+			}
+
+			// メッシュパーツの更新
+			if (partType == PartType::Mesh)
+			{
+				updateMesh(pPartState);
 			}
 		}
 	}
@@ -672,13 +790,12 @@ namespace s3d::SpriteStudio
 			{
 				AttributeValueCell prev = pPartState->refCell;
 				Utilities::GetKeyValue(currentFrame, pSetupPart, attribute, pPartState->refCell);
-				if (prev != pPartState->refCell and m_pProject != nullptr)
+				if (m_pProject != nullptr and prev != pPartState->refCell)
 				{
-					if (not(getCellTexture(pPartState->refCell, pPartState->pCell, pPartState->pTexture)))
+					if (not(getCellTexture(m_pProject, pPartState->refCell, pPartState->cellmapTextureInfo)))
 					{
 						// 画像、セルの設定に失敗している。
-						pPartState->pCell = nullptr;
-						pPartState->pTexture = nullptr;
+						pPartState->cellmapTextureInfo = CellmapTextureInfo{};
 					}
 				}
 				break;
@@ -925,34 +1042,230 @@ namespace s3d::SpriteStudio
 	}
 
 	//================================================================================
-	void AnimationController::updateVertices(AnimationPartState* pPartState, const AnimationModelPart* pModelPart, const AnimationPart* pAnimationPart)
+	void AnimationController::updateInstance(AnimationPartState* pPartState, int32 frame)
 	{
-		if (pModelPart == nullptr
-			or pPartState == nullptr)
+		if (pPartState == nullptr)
 		{
 			return;
 		}
 
-		const Cell* pCell = pPartState->pCell;
-		const auto& partType = pModelPart->partType;
-
-		if (partType == PartType::Shape)
+		auto* pInstanceValue = std::get_if<AnimationPartStateInstance>(&(pPartState->partValue));
+		if (pInstanceValue == nullptr)
 		{
-			pCell = nullptr;
+			// インスタンス値を持っていない？
+			return;
 		}
-		if (partType == PartType::Text)
+		auto* pRefAnimationController = pInstanceValue->pRefAnimationController.get();
+		if (pRefAnimationController == nullptr)
 		{
-
-		}
-		if (partType == PartType::Nineslice)
-		{
-
+			// 参照アニメーションなし？？
+			return;
 		}
 
-		if (pCell != nullptr)
-		{
+		auto& instanceParamRaw = pPartState->instanceParam;
+		const auto* pRefAnimation = pRefAnimationController->getCurrentAnimation();
+		const auto* pRefAnimationSetting = pRefAnimationController->getAnimationSetting();
+		const int32 startFrame = AnimationLabelToFrame(instanceParamRaw.startLabel, instanceParamRaw.startOffset, pRefAnimation, pRefAnimationSetting);
+		const int32 endFrame = AnimationLabelToFrame(instanceParamRaw.endLabel, instanceParamRaw.endOffset, pRefAnimation, pRefAnimationSetting);
+		instanceParamRaw.startFrame = startFrame;
+		instanceParamRaw.endFrame = endFrame;
 
+		int32 playFrame = frame;
+
+		// 独立動作の場合
+		if (instanceParamRaw.isIndependent)
+		{
+			const int32 delta = frame - m_prevFrame;
+			instanceParamRaw.liveFrame += (delta * instanceParamRaw.speed);
+			playFrame = static_cast<int32>(instanceParamRaw.liveFrame);
 		}
+
+		// このインスタンスが配置されたキーフレーム（絶対時間）
+		const int32 selfTopKeyFrame = instanceParamRaw.curKeyframe;
+
+
+		int32 refTime = static_cast<int32>((playFrame - selfTopKeyFrame) * instanceParamRaw.speed);
+		if (refTime < 0)
+		{
+			return; // そもそも生存時間に存在していない
+		}
+		if (playFrame < selfTopKeyFrame)
+		{
+			return;
+		}
+		int32 instanceScale = (endFrame - startFrame) + 1; // インスタンスの尺
+
+		// 尺が０もしくはマイナス（あり得ない
+		if (instanceScale <= 0)
+		{
+			return;
+		}
+
+		int32 nowLoop = (refTime / instanceScale); // 現在までのループ数
+
+		int32 checkLoopNum = instanceParamRaw.loopNum;
+
+		// pingpongの場合では２倍にする
+		if (instanceParamRaw.isPingPong)
+		{
+			checkLoopNum = checkLoopNum * 2;
+		}
+
+		// 無限ループで無い時にループ数をチェック
+		if (not(instanceParamRaw.isInfinity)) // 無限フラグが有効な場合はチェックせず
+		{
+			if (checkLoopNum <= nowLoop)
+			{
+				refTime = instanceScale - 1;
+				nowLoop = checkLoopNum - 1;
+			}
+		}
+
+		int32 tempFrame = refTime % instanceScale; // ループを加味しないインスタンスアニメ内のフレーム
+
+		//参照位置を決める
+		//現在の再生フレームの計算
+		int32 applyFrame = 0;
+		bool isReverse = instanceParamRaw.isReverse;
+		if (instanceParamRaw.isPingPong and (nowLoop % 2 == 1))
+		{
+			isReverse = !isReverse; // 反転
+		}
+
+		if (isReverse)
+		{
+			// リバースの時
+			applyFrame = endFrame - tempFrame;
+		}
+		else
+		{
+			// 通常時
+			applyFrame = tempFrame + startFrame;
+		}
+
+		// ローカル不透明度を使用する場合、継承の関係で値をローカル値にしておく。
+		const float originalAlpha = pPartState->alpha;
+		if (pPartState->useLocalAlpha)
+		{
+			pPartState->alpha = pPartState->localAlpha; // ローカル値適応
+		}
+
+		pRefAnimationController->m_isInstancePartsHide = pPartState->isHide;
+		pRefAnimationController->setFrame(applyFrame);
+		pRefAnimationController->apply();
+
+		// 戻す
+		pPartState->alpha = originalAlpha;
+	}
+
+	//================================================================================
+	void AnimationController::updateMesh(AnimationPartState* pPartState)
+	{
+		if (pPartState == nullptr)
+		{
+			return;
+		}
+		auto* pBufferRaw = pPartState->pBuffer2D.get();
+		auto* pMeshStateValue = std::get_if<AnimationPartStateMesh>(&(pPartState->partValue));
+		if (pBufferRaw == nullptr
+			or pMeshStateValue == nullptr)
+		{
+			return;
+		}
+		const size_t vertexCount = pBufferRaw->vertices.size();
+		const auto& matrix = pPartState->modelMatrix;
+		const auto& worldMatrix = pPartState->getWorldMatrix();
+		for (int32 i = 0; i < vertexCount; i++)
+		{
+			// デフォームを利用している場合、一旦計算用に保存
+			if (pPartState->useDeform)
+			{
+				Float2 offset = Float2::Zero();
+				const auto& deformParam = pPartState->deformParam;
+				const size_t deformParamCount = deformParam.verticesChanges.size();
+				if (vertexCount == deformParamCount)
+				{
+					// ワールド座標を取得
+					offset = pMeshStateValue->vertexPositions[i] + deformParam.verticesChanges[i];
+					offset = matrix.transformPoint(Float3{ offset, 0.0f }).xy();
+					Float2 tmp = matrix.transformPoint(Float3{ pMeshStateValue->vertexPositions[i], 0.0f }).xy();
+					offset = offset - tmp;
+				}
+				pMeshStateValue->worldVertexPositions[i] = offset;
+			}
+
+			const int32 bindBoneCount = pMeshStateValue->bindBoneInfomations[i].bindBoneCount;
+			if (0 == bindBoneCount)
+			{
+				// バインドされていないメッシュの場合
+				// デフォームオフセットを加える
+				const Float2 offset = pMeshStateValue->vertexPositions[i] + calcOffsetLocalVertexPos(pPartState, i);
+				const Float2 pos = worldMatrix.transformPoint(Float3{ offset, 0.0f }).xy();
+				pBufferRaw->vertices[i].pos.x = pos.x;
+				pBufferRaw->vertices[i].pos.y = -pos.y;
+			}
+			else
+			{
+				Float2 offsetTotal = Float2::Zero();
+				// ボーンの影響計算
+				for (int32 n = 0; n < bindBoneCount; n++)
+				{
+					const auto& info = pMeshStateValue->bindBoneInfomations[i].infomations[n];
+					const auto* pState = info.pState;
+					if (pState == nullptr)
+					{
+						continue;
+					}
+					const float weight = static_cast<float>(info.weight) / 100.0f;
+					const auto& boneMat = pState->modelMatrix;
+					Float2 boneOffset = boneMat.transformPoint(Float3{ info.offset, 0.0f }).xy();
+					boneOffset *= weight;
+					offsetTotal += boneOffset;
+				}
+				const auto& invMat = matrix.inverse();
+				const Float2 tmp = invMat.transformPoint(Float3{ offsetTotal, 0.0f }).xy();
+				offsetTotal = tmp + calcOffsetLocalVertexPos(pPartState, i);
+				const Float2 pos = matrix.transformPoint(Float3{ offsetTotal, 0.0f }).xy();
+				pBufferRaw->vertices[i].pos.x = pos.x;
+				pBufferRaw->vertices[i].pos.y = -pos.y;
+			}
+
+			// アルファ値の設定
+			{
+				float alpha = pPartState->alpha;
+				if (pPartState->useLocalAlpha)
+				{
+					alpha = pPartState->alpha;
+				}
+				pBufferRaw->vertices[i].color.w = alpha;
+			}
+		}
+	}
+
+	//================================================================================
+	Float2 AnimationController::calcOffsetLocalVertexPos(const AnimationPartState* pPartState, int32 index) const
+	{
+		if (pPartState == nullptr)
+		{
+			return Float2::Zero();
+		}
+		const auto* pBuffer2D = pPartState->pBuffer2D.get();
+		auto* pMeshStateValue = std::get_if<AnimationPartStateMesh>(&(pPartState->partValue));
+		if (pBuffer2D == nullptr
+			or pMeshStateValue == nullptr)
+		{
+			return Float2::Zero();
+		}
+		if (index < 0 or pBuffer2D->vertices.size() < index)
+		{
+			return Float2::Zero();
+		}
+		const Mat4x4& matrix = pPartState->modelMatrix;
+		Float2 offset = matrix.transformPoint(Float3{ pMeshStateValue->vertexPositions[index], 0.0f }).xy();
+		Float2 tmp = offset + pMeshStateValue->worldVertexPositions[index];
+		Mat4x4 invMat = matrix.inverse();
+		tmp = invMat.transformPoint(Float3{ tmp, 0.0f }).xy();
+		return Float2(tmp - pMeshStateValue->vertexPositions[index]);
 	}
 
 }

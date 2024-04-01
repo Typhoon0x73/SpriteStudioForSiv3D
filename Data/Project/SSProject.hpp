@@ -69,6 +69,11 @@ namespace s3d::SpriteStudio
 		[[nodiscard]]
 		const Array<Cellmap>& getCellmaps() const noexcept;
 
+		/// @brief セルマップ参照を取得します。
+		/// @param mapId 参照マップID
+		/// @return 範囲内であれば参照が返ります。範囲外を指定した場合、nullptr
+		const Cellmap* const getCellmap(int32 mapId) const;
+
 		/// @brief 素材データを参照で取得します。
 		/// @return 素材データ
 		[[nodiscard]]

@@ -6,10 +6,11 @@ namespace s3d::SpriteStudio
 	namespace
 	{
 		//================================================================================
-		bool MakeMesh(const Cell* pCell, const Texture* pTexture, AnimationPartStateMesh& out)
+		bool MakeMesh(const Cell* pCell, const Texture* pTexture, Buffer2D* pBuffer2D, AnimationPartStateMesh& out)
 		{
 			if (
-				(pCell == nullptr)                       // セル情報からメッシュを生成するので無ければ無理。
+				(pBuffer2D == nullptr)                   // バッファも必要。
+				or (pCell == nullptr)                    // セル情報からメッシュを生成するので無ければ無理。
 				or (not(pCell->meshInfoOpt.has_value())) // メッシュ情報無かったら作成できない。
 				or (pTexture == nullptr)                 // 画像データも欲しい。
 				)
@@ -24,12 +25,12 @@ namespace s3d::SpriteStudio
 			const size_t vertexCount = vertices.size();
 			out.vertexPositions.clear();
 			out.worldVertexPositions.clear();
-			out.buffer2D.vertices.clear();
-			out.buffer2D.indices.clear();
+			pBuffer2D->vertices.clear();
+			pBuffer2D->indices.clear();
 			out.vertexPositions.reserve(vertexCount);
 			out.worldVertexPositions.reserve(vertexCount);
-			out.buffer2D.vertices.reserve(vertexCount);
-			out.buffer2D.indices.reserve(vertexCount);
+			pBuffer2D->vertices.reserve(vertexCount);
+			pBuffer2D->indices.reserve(vertexCount);
 
 			out.bindBoneInfomations.clear();
 			out.bindBoneInfomations.resize(vertices.size());
@@ -56,13 +57,13 @@ namespace s3d::SpriteStudio
 				vertex.pos.y = -it.y + offs.y;
 				vertex.tex.x = (cellPos.x + it.x) * uvPixelX;
 				vertex.tex.y = (cellPos.y + it.y) * uvPixelY;
-				out.buffer2D.vertices.emplace_back(vertex);
+				pBuffer2D->vertices.emplace_back(vertex);
 				out.vertexPositions.emplace_back(vertex.pos);
 				out.worldVertexPositions.emplace_back(Float2::Zero());
 			}
 			for (const auto& it : indices)
 			{
-				out.buffer2D.indices.emplace_back(it);
+				pBuffer2D->indices.emplace_back(it);
 			}
 
 			return true;
@@ -76,16 +77,15 @@ namespace s3d::SpriteStudio
 			// ノーマルパーツ
 			if (partType == PartType::Normal)
 			{
-				partValueRaw = AnimationPartStateNormal();
-				auto& valueRaw = std::get<AnimationPartStateNormal>(partValueRaw);
-				valueRaw.buffer2D.indices[0] = { static_cast<uint16>(0), static_cast<uint16>(1), static_cast<uint16>(2) };
-				valueRaw.buffer2D.indices[1] = { static_cast<uint16>(2), static_cast<uint16>(1), static_cast<uint16>(3) };
+				pOutPartState->pBuffer2D = std::make_unique<Buffer2D>(4U, 2U);
+				auto* pBuffer2D = pOutPartState->pBuffer2D.get();
+				pBuffer2D->indices[0] = { static_cast<uint16>(0), static_cast<uint16>(1), static_cast<uint16>(2) };
+				pBuffer2D->indices[1] = { static_cast<uint16>(2), static_cast<uint16>(1), static_cast<uint16>(3) };
 				// カラー値の初期化
-				for (auto& vertex : valueRaw.buffer2D.vertices)
+				for (auto& vertex : pBuffer2D->vertices)
 				{
 					vertex.color = Float4::One();
 				}
-				return true;
 			}
 
 			// インスタンスパーツの場合、アニメーションを作成する
@@ -125,9 +125,11 @@ namespace s3d::SpriteStudio
 			// メッシュパーツ
 			if (partType == PartType::Mesh)
 			{
+				pOutPartState->pBuffer2D.reset();
+				pOutPartState->pBuffer2D = std::make_unique<Buffer2D>();
 				partValueRaw = AnimationPartStateMesh();
 				auto& valueRaw = std::get<AnimationPartStateMesh>(partValueRaw);
-				if (not(MakeMesh(pOutPartState->pCell, pOutPartState->pTexture, valueRaw)))
+				if (not(MakeMesh(pOutPartState->cellmapTextureInfo.pCell, pOutPartState->cellmapTextureInfo.pTexture, pOutPartState->pBuffer2D.get(), valueRaw)))
 				{
 					// メッシュを作成できなかった。
 					return false;
@@ -179,7 +181,7 @@ namespace s3d::SpriteStudio
 
 
 	//================================================================================
-	AnimationPartState* AnimationPartStateBuilder::Build(const Project* pProject, const AnimationModelPart* pModelPart, const AnimationPart* pSetupPart, const AnimationPart* pAnimationPart, const Cell* pCell, const Texture* pTexture)
+	AnimationPartState* AnimationPartStateBuilder::Build(const Project* pProject, const AnimationModelPart* pModelPart, const AnimationPart* pSetupPart, const AnimationPart* pAnimationPart, const CellmapTextureInfo& cellmapTextureInfo)
 	{
 		// モデルパーツがnullptrということはありえない。
 		// プロジェクトデータがない場合は作成できないものがある。
@@ -191,8 +193,7 @@ namespace s3d::SpriteStudio
 		pState->pAnimationModelPart = pModelPart;
 		pState->pSetupAnimationPart = pSetupPart; // nullptrの場合もある
 		pState->pAnimationPart = pAnimationPart;  // nullptrの場合もある
-		pState->pCell = pCell;
-		pState->pTexture = pTexture;
+		pState->cellmapTextureInfo = cellmapTextureInfo;
 
 		// アルファ値の継承率を設定
 		pState->alphaInheritRate = pModelPart->alphaIheritRate;

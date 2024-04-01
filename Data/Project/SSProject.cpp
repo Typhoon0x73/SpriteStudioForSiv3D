@@ -106,6 +106,16 @@ namespace s3d::SpriteStudio
 	}
 
 	//================================================================================
+	const Cellmap* const Project::getCellmap(int32 mapId) const
+	{
+		if (0 <= mapId and mapId < static_cast<int32>(m_cellmaps.size()))
+		{
+			return &m_cellmaps[mapId];
+		}
+		return nullptr;
+	}
+
+	//================================================================================
 	ResourcePack& Project::getResourcePackRaw() noexcept
 	{
 		return m_resourcePack;
@@ -143,9 +153,9 @@ namespace s3d::SpriteStudio
 	//================================================================================
 	const Cell* const Project::findCell(int32 mapId, StringView cellName) const noexcept
 	{
-		if (0 <= mapId and mapId < static_cast<int32>(m_cellmaps.size()))
+		if (auto* pCellmap = getCellmap(mapId))
 		{
-			for (const auto& cell : m_cellmaps[mapId].cells)
+			for (const auto& cell : pCellmap->cells)
 			{
 				if (cell.name == cellName)
 				{

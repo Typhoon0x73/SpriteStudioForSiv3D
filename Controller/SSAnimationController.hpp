@@ -10,6 +10,13 @@ namespace s3d::SpriteStudio
 	{
 	public:
 
+		/// @brief 指定アニメーションの中から、探したいラベル名を指定して見つかったフレーム値を返します。
+		/// @param pAnim 指定アニメーション
+		/// @param label ラベル名
+		/// @return 見つかった場合、見つけたフレーム。それ以外 -1
+		[[nodiscard]]
+		static int32 FindAnimationLabelToFrame(const Animation* pAnimation, StringView label);
+
 		/// @brief コンストラクタ
 		[[nodiscard]]
 		AnimationController();
@@ -19,7 +26,7 @@ namespace s3d::SpriteStudio
 		/// @param animationPackName 再生するアニメーションを含むアニメーションパック名
 		/// @param animationName 再生するアニメーション名
 		[[nodiscard]]
-		AnimationController(const Project* pProject, StringView animationPackName, StringView animationName);
+		explicit AnimationController(const Project* pProject, StringView animationPackName, StringView animationName);
 
 		/// @brief デストラクタ
 		virtual ~AnimationController();
@@ -48,14 +55,54 @@ namespace s3d::SpriteStudio
 
 		/// @brief プロジェクトの設定を取得します。
 		/// @return プロジェクトの設定が返ります。プロジェクトが存在しない場合、nullptr
+		[[nodiscard]]
 		const ProjectSetting* const getProjectSetting() const noexcept;
+
+		/// @brief アニメーション設定のFPSを取得します。
+		/// @return 再生できるアニメーションが設定されていなければ 0 を返します。
+		[[nodiscard]]
+		int32 getFPS() const noexcept;
 
 		/// @brief パーツリストを取得します。
 		/// @return パーツリスト
 		[[nodiscard]]
 		Array<std::unique_ptr<AnimationPartState>>& getPartStatesRaw() noexcept;
 
+		/// @brief パーツリストを取得します。
+		/// @return パーツリスト
+		[[nodiscard]]
+		const Array<std::unique_ptr<AnimationPartState>>& getPartStates() const noexcept;
+
+		/// @brief 参照しているプロジェクトデータへのポインタを取得します。
+		/// @return 存在しなければ nullptr
+		[[nodiscard]]
+		const Project* const getProject() const noexcept;
+
+		/// @brief 現在制御しているアニメーションを含むパックを取得します。
+		/// @return 存在しなければ nullptr
+		[[nodiscard]]
+		const AnimationPack* const getCurrentAnimationPack() const noexcept;
+
+		/// @brief 現在制御しているアニメーションを取得します。
+		/// @return 存在しなければ nullptr
+		[[nodiscard]]
+		const Animation* const getCurrentAnimation() const noexcept;
+
+		/// @brief 現在制御しているアニメーションの設定を取得します。
+		/// @return 存在しなければ nullptr
+		[[nodiscard]]
+		const AnimationSetting* const getAnimationSetting() const noexcept;
+
 	private:
+
+		/// @brief インスタンスアニメーションからのラベルのフレーム値を取得します。
+		/// @param label ラベル名
+		/// @param offset オフセット
+		/// @param pAnimation 参照アニメーション
+		/// @param pSetting 参照アニメーション設定
+		/// @return フレーム値
+		[[nodiscard]]
+		static int32 AnimationLabelToFrame(StringView label, int32 offset, const Animation* pAnimation, const AnimationSetting* pSetting);
 
 		/// @brief セットアップパーツ、アニメーションパーツから最初にあるセル参照データを取得します。
 		/// @param pSetupPart セットアップパーツ
@@ -66,12 +113,12 @@ namespace s3d::SpriteStudio
 		bool getFirstCellValue(const AnimationPart* pSetupPart, const AnimationPart* pAnimationPart, AttributeValueCell& out);
 
 		/// @brief セル参照データからセル情報、画像へのポインタを取得します。
+		/// @param pProject 参照するプロジェクトデータ
 		/// @param refCell 検索する参照データ
-		/// @param pOutCell セル出力先
-		/// @param pOutTexture 画像出力先
+		/// @param pOut 出力先
 		/// @return セル、画像ともにポインタ設定できた場合は true を返します。それ以外 false
 		[[nodiscard]]
-		bool getCellTexture(const AttributeValueCell& refCell, const Cell* pOutCell, const Texture* pOutTexture);
+		bool getCellTexture(const Project* pProject, const AttributeValueCell& refCell, CellmapTextureInfo& pOut);
 
 		/// @brief 指定アニメーションデータから各アニメーションパーツを作成します。
 		/// @param pProject プロジェクトの参照
@@ -87,11 +134,12 @@ namespace s3d::SpriteStudio
 		/// @brief ボーン影響値設定を行います。
 		/// @param pAnimationPack アニメーションパックの参照
 		/// @param バインド成功で true を返す。 それ以外 false
+		[[nodiscard]]
 		bool meshPartBind(const AnimationPack* pAnimationPack);
 
 		/// @brief 更新する前に初期化しておきたいパラメータを初期化します。
 		/// @param pPartState 初期化するパーツ
-		void initPartState(AnimationPartState* pPartState);
+		void initState(AnimationPartState* pPartState);
 
 		/// @brief パーツの状態を指定したフレームの状態に更新します。
 		/// @param pPartState 更新するパーツ
@@ -104,11 +152,21 @@ namespace s3d::SpriteStudio
 		/// @param frame 指定フレーム
 		void updatePartStateAttributes(AnimationPartState* pPartState, const Array<AnimationAttribute>& attributes, int32 frame);
 
-		/// @brief 頂点を更新します。
+		/// @brief インスタンスパーツを指定フレームの状態に更新します。
 		/// @param pPartState 更新するパーツ
-		/// @param pModelPart モデルパーツ
-		/// @param pAnimationPart アニメーションパーツ
-		void updateVertices(AnimationPartState* pPartState, const AnimationModelPart* pModelPart, const AnimationPart* pAnimationPart);
+		/// @param frame 指定フレーム
+		void updateInstance(AnimationPartState* pPartState, int32 frame);
+
+		/// @brief メッシュの状態を更新します。
+		/// @param pPartState 更新するパーツ
+		void updateMesh(AnimationPartState* pPartState);
+
+		/// @brief 頂点のローカルオフセット値を算出します。
+		/// @param pPartState 参照するパーツ
+		/// @param index 頂点インデックス
+		/// @return ローカルオフセット値
+		[[nodiscard]]
+		Float2 calcOffsetLocalVertexPos(const AnimationPartState* pPartState, int32 index) const;
 
 private:
 
@@ -126,6 +184,9 @@ private:
 
 		/// @brief フレーム
 		int32 m_frame;
+
+		/// @brief 直前のフレーム
+		int32 m_prevFrame;
 
 		/// @brief 適応が必要な状態かのフラグ
 		bool m_isNeedApply;

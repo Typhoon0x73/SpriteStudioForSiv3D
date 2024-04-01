@@ -40,9 +40,6 @@ namespace s3d::SpriteStudio
 			int32 bindBoneCount;
 		};
 
-		/// @brief 描画用バッファ2D
-		Buffer2D buffer2D{};
-
 		/// @brief 計算用
 		Array<Float2> vertexPositions{};
 
@@ -51,5 +48,8 @@ namespace s3d::SpriteStudio
 
 		/// @brief ボーンウェイトリスト
 		Array<BoneWeight> bindBoneInfomations{};
+
+
+		Float2 calcOffsetLocalVertexPos(int32 index);
 	};
 }
