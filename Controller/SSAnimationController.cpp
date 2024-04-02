@@ -1,6 +1,7 @@
 ﻿#include "SSAnimationController.hpp"
 #include "PartState/SSAnimationPartStateBuilder.hpp"
 #include "Interpolation/SSInterpolationUtilities.hpp"
+#include "../Common/SSOutputDebugLog.hpp"
 
 namespace s3d::SpriteStudio
 {
@@ -112,18 +113,21 @@ namespace s3d::SpriteStudio
 	{
 		if (pProject == nullptr)
 		{
+			DebugLog::Print(DebugLog::LogType::Error, U"プロジェクトデータを指定してください。");
 			return false;
 		}
 
 		const auto* pAnimationPack = pProject->findAnimationPack(animationPackName);
 		if (pAnimationPack == nullptr)
 		{
+			DebugLog::Print(DebugLog::LogType::Error, U"アニメーションパックが見つかりませんでした。:{}"_fmt(animationPackName));
 			return false;
 		}
 
 		const auto* pAnimation = pAnimationPack->findAnimation(animationName);
 		if (pAnimationPack == nullptr)
 		{
+			DebugLog::Print(DebugLog::LogType::Error, U"アニメーションが見つかりませんでした。:{}"_fmt(animationName));
 			return false;
 		}
 
@@ -133,6 +137,7 @@ namespace s3d::SpriteStudio
 		// パーツを作成。
 		if (not(createAnimationPartStates(pProject, pAnimationPack, pAnimation)))
 		{
+			DebugLog::Print(DebugLog::LogType::Error, U"パーツの作成に失敗しました。");
 			return false;
 		}
 
@@ -154,6 +159,7 @@ namespace s3d::SpriteStudio
 		if (not(meshPartBind(pAnimationPack)))
 		{
 			// バインド失敗
+			DebugLog::Print(DebugLog::LogType::Error, U"パーツのバインドに失敗しました。");
 			return false;
 		}
 
@@ -170,6 +176,7 @@ namespace s3d::SpriteStudio
 		if (m_pAnimationSetting == nullptr)
 		{
 			// アニメーション設定が無いと、フレーム計算等できない。
+			DebugLog::Print(DebugLog::LogType::Error, U"アニメーション設定を取得できませんでした。");
 			return false;
 		}
 
@@ -252,6 +259,16 @@ namespace s3d::SpriteStudio
 	}
 
 	//================================================================================
+	Size AnimationController::getCanvasSize() const noexcept
+	{
+		if (m_pAnimationSetting == nullptr)
+		{
+			return Size::Zero();
+		}
+		return m_pAnimationSetting->canvasSize;
+	}
+
+	//================================================================================
 	int32 AnimationController::getFPS() const noexcept
 	{
 		if (m_pAnimationSetting == nullptr)
@@ -259,6 +276,36 @@ namespace s3d::SpriteStudio
 			return 0;
 		}
 		return m_pAnimationSetting->fps;
+	}
+
+	//================================================================================
+	int32 AnimationController::getFrameCount() const noexcept
+	{
+		if (m_pAnimationSetting == nullptr)
+		{
+			return 0;
+		}
+		return m_pAnimationSetting->frameCount;
+	}
+
+	//================================================================================
+	int32 AnimationController::getStartFrame() const noexcept
+	{
+		if (m_pAnimationSetting == nullptr)
+		{
+			return -1;
+		}
+		return m_pAnimationSetting->startFrame;
+	}
+
+	//================================================================================
+	int32 AnimationController::getEndFrame() const noexcept
+	{
+		if (m_pAnimationSetting == nullptr)
+		{
+			return -1;
+		}
+		return m_pAnimationSetting->endFrame;
 	}
 
 	//================================================================================
@@ -320,11 +367,13 @@ namespace s3d::SpriteStudio
 		if (pCellKeyFrame == nullptr)
 		{
 			// アトリビュートが空？？？
+			DebugLog::Print(DebugLog::LogType::Error, U"セルアトリビュートはありますが、キー値がありません。");
 			return false;
 		}
 		if (not(std::holds_alternative<AttributeValueCell>(pCellKeyFrame->attributeVariantValue)))
 		{
 			// セル情報ではない？？？
+			DebugLog::Print(DebugLog::LogType::Error, U"セルアトリビュート値がセル値として保存されていません。");
 			return false;
 		}
 		// データ取得。
@@ -338,6 +387,7 @@ namespace s3d::SpriteStudio
 		// プロジェクトデータがなければ設定できない。
 		if (pProject == nullptr)
 		{
+			DebugLog::Print(DebugLog::LogType::Error, U"プロジェクトデータを指定してください。");
 			return false;
 		}
 		// セルマップから画像を探す
@@ -345,6 +395,7 @@ namespace s3d::SpriteStudio
 		if (refCell.mapId < 0 or static_cast<int32>(cellmaps.size()) <= refCell.mapId)
 		{
 			// セルマップ配列の境界外。
+			DebugLog::Print(DebugLog::LogType::Error, U"セルマップ配列の範囲外を指定しています。");
 			return false;
 		}
 		const auto& cellmapName = cellmaps[refCell.mapId].name;
@@ -354,6 +405,7 @@ namespace s3d::SpriteStudio
 		if (cellmapTextureTable.end() == cellmapTextureItr)
 		{
 			// 画像データが見つからなかった。
+			DebugLog::Print(DebugLog::LogType::Error, U"画像データが見つかりませんでした。cellmapName:{}"_fmt(cellmapName));
 			return false;
 		}
 		// セル、画像を設定する。
@@ -373,7 +425,7 @@ namespace s3d::SpriteStudio
 		}
 
 		const auto& model = pAnimationPack->model;
-		const auto& pSetupAnimation = pAnimationPack->pSetupAnimation;
+		const auto& pSetupAnimation = pAnimationPack->getSetupAnimation();
 
 		// モデルパーツ分だけステートを用意
 		const auto& modelParts = model.parts;
@@ -481,6 +533,7 @@ namespace s3d::SpriteStudio
 		if (pAnimationPack == nullptr)
 		{
 			// アニメーションパック無しだとバインドできない。
+			DebugLog::Print(DebugLog::LogType::Error, U"アニメーションパック参照がありませんでした。");
 			return false;
 		}
 
@@ -496,6 +549,7 @@ namespace s3d::SpriteStudio
 		if (meshPartStateCount != meshBinds.size())
 		{
 			// バインド数とパーツ数が一致しない。
+			DebugLog::Print(DebugLog::LogType::Error, U"バインド数とパーツ数が一致していません。");
 			return false;
 		}
 
@@ -519,6 +573,7 @@ namespace s3d::SpriteStudio
 			if (not(std::holds_alternative<AnimationPartStateMesh>(m_meshPartStates[i]->partValue)))
 			{
 				// データが取れない。どこかで設定を間違えている。
+				DebugLog::Print(DebugLog::LogType::Error, U"メッシュパーツとして値を取得できませんでした。");
 				return false;
 			}
 			auto& meshPartStateValue = std::get<AnimationPartStateMesh>(m_meshPartStates[i]->partValue);

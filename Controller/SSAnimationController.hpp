@@ -58,10 +58,30 @@ namespace s3d::SpriteStudio
 		[[nodiscard]]
 		const ProjectSetting* const getProjectSetting() const noexcept;
 
+		/// @brief アニメーション設定のキャンバスサイズを取得します。
+		/// @return 再生できるアニメーションが設定されていなければ Size::Zero() を返します。
+		[[nodiscard]]
+		Size getCanvasSize() const noexcept;
+
 		/// @brief アニメーション設定のFPSを取得します。
 		/// @return 再生できるアニメーションが設定されていなければ 0 を返します。
 		[[nodiscard]]
 		int32 getFPS() const noexcept;
+
+		/// @brief アニメーション設定のフレーム数を取得します。
+		/// @return 再生できるアニメーションが設定されていなければ 0 を返します。
+		[[nodiscard]]
+		int32 getFrameCount() const noexcept;
+
+		/// @brief アニメーションの開始フレームを取得します。
+		/// @return 再生できるアニメーションが設定されていなければ -1 を返します。
+		[[nodiscard]]
+		int32 getStartFrame() const noexcept;
+
+		/// @brief アニメーションの終了フレームを取得します。
+		/// @return 再生できるアニメーションが設定されていなければ -1 を返します。
+		[[nodiscard]]
+		int32 getEndFrame() const noexcept;
 
 		/// @brief パーツリストを取得します。
 		/// @return パーツリスト

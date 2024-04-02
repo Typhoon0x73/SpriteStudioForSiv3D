@@ -1,5 +1,6 @@
 ﻿#include "SSAnimationPartStateBuilder.hpp"
 #include "../SSAnimationController.hpp"
+#include "../../Common/SSOutputDebugLog.hpp"
 
 namespace s3d::SpriteStudio
 {
@@ -15,6 +16,7 @@ namespace s3d::SpriteStudio
 				or (pTexture == nullptr)                 // 画像データも欲しい。
 				)
 			{
+				DebugLog::Print(DebugLog::LogType::Error, U"データ不十分の為作成できませんでした。");
 				return false;
 			}
 
@@ -99,6 +101,7 @@ namespace s3d::SpriteStudio
 				if (not(std::holds_alternative<ModelPartInfoInstance>(pModelPart->partVariantValue)))
 				{
 					// インスタンスパーツ情報でない？？？
+					DebugLog::Print(DebugLog::LogType::Notice, U"インスタンスパーツタイプですが、データが正しく入っていません。");
 					return false;
 				}
 
@@ -110,6 +113,7 @@ namespace s3d::SpriteStudio
 				if (not(valueRaw.pRefAnimationController->build(pProject, instancePackName, instanceAnimName)))
 				{
 					// アニメーションの作成に失敗した。
+					DebugLog::Print(DebugLog::LogType::Error, U"インスタンスパーツのアニメーション作成に失敗しました。");
 					return false;
 				}
 				// 親子付け
@@ -132,6 +136,7 @@ namespace s3d::SpriteStudio
 				if (not(MakeMesh(pOutPartState->cellmapTextureInfo.pCell, pOutPartState->cellmapTextureInfo.pTexture, pOutPartState->pBuffer2D.get(), valueRaw)))
 				{
 					// メッシュを作成できなかった。
+					DebugLog::Print(DebugLog::LogType::Error, U"メッシュパーツの作成に失敗しました。");
 					return false;
 				}
 				return true;
@@ -173,6 +178,7 @@ namespace s3d::SpriteStudio
 			}
 			default:
 				// 知らない種類がきた。
+				DebugLog::Print(DebugLog::LogType::Notice, U"知らない当たり判定の種類です。:{}"_fmt(FromEnum(type)));
 				return false;
 			}
 			return true;
@@ -187,6 +193,7 @@ namespace s3d::SpriteStudio
 		// プロジェクトデータがない場合は作成できないものがある。
 		if (pModelPart == nullptr or pProject == nullptr)
 		{
+			DebugLog::Print(DebugLog::LogType::Error, U"データ不十分により作成できません。");
 			return nullptr;
 		}
 		AnimationPartState* pState = new AnimationPartState();
@@ -207,6 +214,7 @@ namespace s3d::SpriteStudio
 				delete pState;
 				pState = nullptr;
 			}
+			DebugLog::Print(DebugLog::LogType::Error, U"パーツの作成に失敗しました。");
 			return nullptr;
 		}
 
@@ -219,6 +227,7 @@ namespace s3d::SpriteStudio
 				delete pState;
 				pState = nullptr;
 			}
+			DebugLog::Print(DebugLog::LogType::Error, U"当たり判定形状の作成に失敗しました。");
 			return nullptr;
 		}
 

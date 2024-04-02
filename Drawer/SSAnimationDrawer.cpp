@@ -175,7 +175,7 @@ namespace s3d::SpriteStudio
 			case PartType::Mesh:
 			{
 				const Transformer2D drawTrans{ Mat3x2::Translate(x, y) };
-				drawPartInstance(pPartState.get(), x, y);
+				drawPartMesh(pPartState.get());
 				break;
 			}
 			default:
@@ -380,7 +380,9 @@ namespace s3d::SpriteStudio
 				{
 					it.color = Float4::One().withW(originalAlpha);
 				}
+				return;
 			}
+			return;
 		}
 		// 通常描画
 		pBuffer2D->draw(*pTexture);

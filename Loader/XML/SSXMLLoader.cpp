@@ -76,18 +76,18 @@ namespace s3d::SpriteStudio
 			DebugLog::Print(DebugLog::LogType::Info, U"解析完了。");
 
 			// セットアップアニメーションを設定しておく
-			for (auto& animation : animPack.animations)
+			for (size_t i = 0; i < animPack.animations.size(); i++)
 			{
-				if (animation.isSetup)
+				if (animPack.animations[i].isSetup)
 				{
-					animPack.pSetupAnimation = &animation;
+					animPack.setupIndex = static_cast<int32>(i);
 					break;
 				}
 			}
 
 			// セットアップデータがないのはスプライトスタジオVer6未満のデータである可能性がある。
 			// Ver6未満は動作保証するつもりが無いので警告を出しておく。
-			if (animPack.pSetupAnimation == nullptr)
+			if (animPack.getSetupAnimation() == nullptr)
 			{
 				DebugLog::Print(DebugLog::LogType::Werning, U"セットアップデータがありません。");
 			}

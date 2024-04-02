@@ -18,14 +18,19 @@ namespace s3d::SpriteStudio
 		/// @brief アニメーション用モデル
 		AnimationModel model{};
 
-		/// @brief 参照するセットアップアニメーション
-		Animation* pSetupAnimation{ nullptr };
+		/// @brief 参照するセットアップアニメーションへのインデックス
+		int32 setupIndex{ -1 };
 
 		/// @brief 利用するセルマップ名一覧
 		Array<String> cellmapNames{};
 
 		/// @brief パックに含まれるアニメーションデータ
 		Array<Animation> animations{};
+
+		/// @brief セットアップアニメーションへのポインタを取得します。
+		/// @return セットアップアニメーションが無ければ nullptr を返します。
+		[[nodiscard]]
+		const Animation* const getSetupAnimation() const;
 
 		/// @brief アニメーションパック名,アニメーション名からアニメーションを探します。
 		/// @param animationName アニメーション名

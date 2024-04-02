@@ -6,6 +6,9 @@
 
 namespace s3d::SpriteStudio
 {
+	/// @brief 生成時にplay関数を呼んでおくか
+	using StartPlaying = YesNo<struct StartPlaying_tag>;
+
 	/// @brief ループフラグ指定用
 	using LoopEnable = YesNo<struct LoopEnable_tag>;
 
@@ -16,7 +19,8 @@ namespace s3d::SpriteStudio
 	enum class ChangeAnimationSetting
 	{
 		None,     // 無いものはない。切り替えできなければ false を返す。
-		AddBuild, // 配列に無い場合は、その場でbuildして問題が無ければ配列へ追加し切り替える。
+		AddBuild, // 配列に無い場合は、その場でaddBuildして問題が無ければ切り替える。
+		Rebuild,  // 配列に無い場合は、その場でrebuildして問題が無ければ切り替える。
 	};
 
 	/// @brief ビルド用情報
@@ -50,32 +54,45 @@ namespace s3d::SpriteStudio
 
 		/// @brief プロジェクトとアニメーションを指定してアニメーション制御を作成します。
 		/// @param pProject 参照するプロジェクト
-		/// @param animationPack 再生するアニメーションを含むアニメーションパック名
-		/// @param animation 再生するアニメーション名
+		/// @param animationPackName 再生するアニメーションを含むアニメーションパック名
+		/// @param animationName 再生するアニメーション名
+		/// @param startPlaying 作成時にplay関数を呼んでおくかどうか
 		[[nodiscard]]
-		explicit AnimationPlayer(const Project* pProject, StringView animationPack, StringView animation);
+		explicit AnimationPlayer(const Project* pProject, StringView animationPackName, StringView animationName, StartPlaying startPlaying = StartPlaying::Yes);
 
 		/// @brief プロジェクトとアニメーションを指定してアニメーション制御を作成します。
 		/// @param buildInfo まとめて生成する用のビルド情報
+		/// @param startPlaying 作成時にplay関数を呼んでおくかどうか
 		[[nodiscard]]
-		explicit AnimationPlayer(const AnimationBuildInfo& buildInfo);
+		explicit AnimationPlayer(const AnimationBuildInfo& buildInfo, StartPlaying startPlaying = StartPlaying::Yes);
 
 		/// @brief デストラクタ
 		virtual ~AnimationPlayer();
+
+		/// @brief clear()後にプロジェクトとアニメーションを指定してアニメーション制御を作成します。
+		/// @param pProject 参照するプロジェクト
+		/// @param animationPack 再生するアニメーションを含むアニメーションパック名
+		/// @param animation 再生するアニメーション名
+		/// @param startPlaying 作成時にplay関数を呼んでおくかどうか
+		/// @return 成功で true を返します。それ以外 false
+		[[nodiscard]]
+		bool rebuild(const Project* pProject, StringView animationPack, StringView animation, StartPlaying startPlaying = StartPlaying::Yes);
 
 		/// @brief プロジェクトとアニメーションを指定してアニメーション制御を作成します。
 		/// @param pProject 参照するプロジェクト
 		/// @param animationPack 再生するアニメーションを含むアニメーションパック名
 		/// @param animation 再生するアニメーション名
+		/// @param startPlaying 作成時にplay関数を呼んでおくかどうか
 		/// @return 成功で true を返します。それ以外 false
 		[[nodiscard]]
-		bool build(const Project* pProject, StringView animationPack, StringView animation);
+		bool addBuild(const Project* pProject, StringView animationPack, StringView animation, StartPlaying startPlaying = StartPlaying::Yes);
 
 		/// @brief プロジェクトとアニメーションを指定してアニメーション制御を作成します。
 		/// @param buildInfo まとめて生成する用のビルド情報
+		/// @param startPlaying 作成時にplay関数を呼んでおくかどうか
 		/// @return 成功で true を返します。それ以外 false
 		[[nodiscard]]
-		bool build(const AnimationBuildInfo& buildInfo);
+		bool addBuild(const AnimationBuildInfo& buildInfo, StartPlaying startPlaying = StartPlaying::Yes);
 
 		/// @brief 更新
 		/// @param delta 更新する時間
@@ -109,37 +126,34 @@ namespace s3d::SpriteStudio
 		void drawPivot(const Vec2& pos) const;
 
 		/// @brief アニメーションを変更します。
-		/// @param animationPack 再生するアニメーションを含むアニメーションパック名
-		/// @param animation 再生するアニメーション名
+		/// @param animationPackName 再生するアニメーションを含むアニメーションパック名
+		/// @param animationName 再生するアニメーション名
 		/// @param sameChange 同じアニメーションを指定しても切り替え処理をするか
 		/// @param changeAnimationSetting 切り替え失敗時の動作
 		/// @return 成功で true を返します。それ以外 false
-		[[nodiscard]]
-		bool changeAnimation(StringView animationPack, StringView animation, SameChange sameChange = SameChange::No, ChangeAnimationSetting changeAnimationSetting = ChangeAnimationSetting::None);
+		bool changeAnimation(StringView animationPackName, StringView animationName, SameChange sameChange = SameChange::No, ChangeAnimationSetting changeAnimationSetting = ChangeAnimationSetting::None);
 
 		/// @brief アニメーションを変更します。
-		/// @param animation 再生するアニメーション名
+		/// @param animationName 再生するアニメーション名
 		/// @param sameChange 同じアニメーションを指定しても切り替え処理をするか
 		/// @param changeAnimationSetting 切り替え失敗時の動作
 		/// @return 成功で true を返します。それ以外 false
-		[[nodiscard]]
-		bool changeAnimation(StringView animation, SameChange sameChange = SameChange::No, ChangeAnimationSetting changeAnimationSetting = ChangeAnimationSetting::None);
+		bool changeAnimation(StringView animationName, SameChange sameChange = SameChange::No, ChangeAnimationSetting changeAnimationSetting = ChangeAnimationSetting::None);
 
 		/// @brief アニメーションを変更します。
 		/// @param index 再生するアニメーションインデックス
 		/// @param sameChange 同じアニメーションを指定しても切り替え処理をするか
 		/// @return 成功で true を返します。それ以外 false
-		[[nodiscard]]
 		bool changeAnimation(int32 index, SameChange sameChange = SameChange::No);
 
 		/// @brief 全ての情報を破棄し、初期化します。
 		void clear();
 
+		/// @brief 再生を開始します。
+		void play();
+
 		/// @brief 一時停止します。
 		void stop();
-
-		/// @brief 一時停止状態から再開します。
-		void resume();
 
 		/// @brief 再生フレームを開始フレームにします。
 		void resetFrame();
@@ -156,15 +170,75 @@ namespace s3d::SpriteStudio
 		/// @param seconds 指定する時間（秒）
 		void setTime(SecondsF seconds);
 
+		/// @brief アニメーション制御一覧を返します。
+		/// @return アニメーション制御配列
+		[[nodiscard]]
+		const Array<std::unique_ptr<AnimationController>>& getAnimationControllers() const noexcept;
+
+		/// @brief 現在再生中のアニメーション制御を取得します。
+		/// @return 再生中のアニメーション制御が無ければ nullptr が返ります。
+		[[nodiscard]]
+		const AnimationController* const getCurrentAnimationController() const noexcept;
+
+		/// @brief 現在再生中のアニメーション制御番号を取得します。
+		/// @return 現在再生中のアニメーション制御が無ければ -1 が返ります。
+		[[nodiscard]]
+		int32 getCurrentAnimationIndex() const noexcept;
+
+		/// @brief 現在の再生時間を取得します。
+		/// @return 再生時間(秒)
+		[[nodiscard]]
+		double getTime() const noexcept;
+
+		/// @brief 現在の再生フレームを取得します。
+		/// @return 再生フレーム
+		[[nodiscard]]
+		int32 getFrame() const noexcept;
+
+		/// @brief キャンバスサイズを返します。
+		/// @return キャンバスサイズ or Size::Zero()
+		[[nodiscard]]
+		Size getCanvasSize() const noexcept;
+
 		/// @brief 現在再生中のアニメーションのFPSを取得します。
 		/// @return アニメーション設定が無ければ 0 が返ります。
 		[[nodiscard]]
 		int32 getCurrentAnimationFPS() const noexcept;
 
+		/// @brief 現在再生中のアニメーションのフレーム数を取得します。
+		/// @return アニメーション設定が無ければ 0 が返ります。
+		[[nodiscard]]
+		int32 getCurrentAnimationFrameCount() const noexcept;
+
+		/// @brief 現在再生中のアニメーションの開始フレームを取得します。
+		/// @return アニメーション設定が無ければ -1 が返ります。
+		[[nodiscard]]
+		int32 getCurrentAnimationStartFrame() const noexcept;
+
+		/// @brief 現在再生中のアニメーションの終了フレームを取得します。
+		/// @return アニメーション設定が無ければ -1 が返ります。
+		[[nodiscard]]
+		int32 getCurrentAnimationEndFrame() const noexcept;
+
+		/// @brief 現在再生中のアニメーションパック名を取得します。
+		/// @return 現在再生中のアニメーションパック名
+		[[nodiscard]]
+		StringView getCurrentAnimationPackName() const noexcept;
+
+		/// @brief 現在再生中のアニメーション名を取得します。
+		/// @return 現在再生中のアニメーション名
+		[[nodiscard]]
+		StringView getCurrentAnimationName() const noexcept;
+
 		/// @brief アニメーションが止まっているかを返します。
 		/// @return isEnd() が true もしくは stop() により停止していれば true を返します。 それ以外 false
 		[[nodiscard]]
 		bool isStopped() const noexcept;
+
+		/// @brief 再生中の判定を返します。
+		/// @return 再生中であれば true を返します。それ以外 false
+		[[nodiscard]]
+		bool isPlaying() const noexcept;
 
 		/// @brief アニメーションが終了しているかを返します。
 		/// @remarks isLoop()がtrueを返す場合、trueになることはありません。
@@ -181,6 +255,9 @@ namespace s3d::SpriteStudio
 		/// @return 再生可能であれば true を返します。 それ以外 false
 		[[nodiscard]]
 		bool isReady() const noexcept;
+
+		/// @brief isReady() 
+		virtual operator bool() const noexcept;
 
 	private:
 

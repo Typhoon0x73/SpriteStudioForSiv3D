@@ -438,11 +438,11 @@ namespace s3d::SpriteStudio::XMLParser
 		{
 			for (auto child = element.firstChild(); not(child.isNull()); child = child.nextSibling())
 			{
-				if (Utilities::TextToColor(element, U"rgba", out.rgba))
+				if (Utilities::TextToColor(child, U"rgba", out.rgba))
 				{
 					continue;
 				}
-				if (Utilities::TextToFloat(element, U"rate", out.rate))
+				if (Utilities::TextToFloat(child, U"rate", out.rate))
 				{
 					continue;
 				}
