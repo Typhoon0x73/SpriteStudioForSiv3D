@@ -4,6 +4,9 @@
 
 namespace s3d::SpriteStudio
 {
+	/// @brief 当たり判定の描画フラグ設定用
+	using BoundsDraw = YesNo<struct BoundsDraw_tag>;
+
 	/// @brief アニメーション表示クラス
 	class AnimationDrawer
 	{
@@ -32,6 +35,11 @@ namespace s3d::SpriteStudio
 		/// @brief 参照するアニメーションコントローラーを設定します。
 		/// @param pController 参照するアニメーションコントローラー
 		void setAnimationController(const AnimationController* pController);
+
+		/// @brief 当たり判定の色を描画するか設定します。
+		/// @param fill 塗りつぶしを描画するか
+		/// @param frame 枠を描画するか
+		void setBoundsDraw(BoundsDraw fill, BoundsDraw frame);
 
 		/// @brief 当たり判定の表示色を設定します。
 		/// @param color 塗りつぶしの色
@@ -93,14 +101,39 @@ namespace s3d::SpriteStudio
 
 	private:
 
+		/// @brief ノーマルパーツの描画
+		/// @param pPartState パーツ
 		void drawPartNormal(const AnimationPartState* pPartState) const;
+
+		/// @brief インスタンスパーツの描画
+		/// @param pPartState パーツ
+		/// @param x pivot座標X
+		/// @param y pivot座標Y
 		void drawPartInstance(const AnimationPartState* pPartState, double x, double y) const;
+
+		/// @brief メッシュパーツの描画
+		/// @param pPartState パーツ
 		void drawPartMesh(const AnimationPartState* pPartState) const;
+
+		/// @brief 当たり判定の描画
+		/// @param pPartState パーツ
+		void drawPartBounds(const AnimationPartState* pPartState) const;
 
 	private:
 
+		/// @brief 描画するアニメーションコントローラー
 		const AnimationController* m_pController;
+
+		/// @brief 当たり判定の描画フラグ
+		bool m_isBoundsDrawFill;
+
+		/// @brief 当たり判定の描画フラグ
+		bool m_isBoundsDrawFrame;
+
+		/// @brief 当たり判定の塗りつぶし色
 		ColorF m_boundsColor;
+
+		/// @brief 当たり判定の枠の色
 		ColorF m_boundsFrameColor;
 	};
 }

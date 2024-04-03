@@ -26,6 +26,8 @@ namespace s3d::SpriteStudio
 		: m_pController{ nullptr }
 		, m_boundsColor{ Palette::White }
 		, m_boundsFrameColor{ Palette::White }
+		, m_isBoundsDrawFill{ true }
+		, m_isBoundsDrawFrame{ true }
 	{
 	}
 
@@ -53,6 +55,13 @@ namespace s3d::SpriteStudio
 	void AnimationDrawer::setAnimationController(const AnimationController* pController)
 	{
 		m_pController = pController;
+	}
+
+	//================================================================================
+	void AnimationDrawer::setBoundsDraw(BoundsDraw fill, BoundsDraw frame)
+	{
+		m_isBoundsDrawFill = fill.getBool();
+		m_isBoundsDrawFrame = frame.getBool();
 	}
 
 	//================================================================================
@@ -181,6 +190,8 @@ namespace s3d::SpriteStudio
 			default:
 				break;
 			}
+
+			drawPartBounds(pPartState.get());
 		}
 	}
 
@@ -386,6 +397,40 @@ namespace s3d::SpriteStudio
 		}
 		// 通常描画
 		pBuffer2D->draw(*pTexture);
+	}
+
+	//================================================================================
+	void AnimationDrawer::drawPartBounds(const AnimationPartState* pPartState) const
+	{
+		if (pPartState == nullptr)
+		{
+			return;
+		}
+		if (not(m_isBoundsDrawFill) and not(m_isBoundsDrawFrame))
+		{
+			return;
+		}
+
+		const auto* pBoundsVariant = pPartState->pBoundsValue.get();
+		if (pBoundsVariant == nullptr)
+		{
+			return;
+		}
+
+		std::visit(
+			[this](const auto& bounds)
+			{
+				if (m_isBoundsDrawFill)
+				{
+					bounds.draw(m_boundsColor);
+				}
+				if (m_isBoundsDrawFrame)
+				{
+					bounds.drawFrame(1.0, 1.0, m_boundsFrameColor);
+				}
+			}
+			, *pBoundsVariant
+		);
 	}
 
 }
