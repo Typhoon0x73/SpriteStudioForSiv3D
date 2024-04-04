@@ -3,6 +3,7 @@
 #include "Parser/Project/SSXMLProjectParser.hpp"
 #include "Parser/AnimationPack/SSXMLAnimationPackParser.hpp"
 #include "Parser/Cellmap/SSXMLCellmapParser.hpp"
+#include "Parser/Effect/SSXMLEffectPerser.hpp"
 
 namespace s3d::SpriteStudio
 {
@@ -123,7 +124,32 @@ namespace s3d::SpriteStudio
 			pOut->addCellmap(cellmap);
 		}
 
-		// sseeの解析
+		// sseeファイルの読み込み
+		for (const auto& it : sspjInfo.effectNames)
+		{
+			FilePath sseeDir = FileSystem::PathAppend(projectDir, sspjInfo.relativeEffectBaseDir);
+			FilePath sseePath = FileSystem::PathAppend(sseeDir, it);
+			XMLReader ssee{ sseePath };
+			DebugLog::Print(DebugLog::LogType::Info, U"以下ファイルの解析開始。");
+			DebugLog::Print(DebugLog::LogType::Info, sseePath);
+			if (ssee.isNull())
+			{
+				DebugLog::Print(DebugLog::LogType::Error, U"XMLファイルの読み込みに失敗しました。");
+				return false;
+			}
+
+			// sseeの解析
+			Effect effect;
+			if (not(XMLParser::EffectParser(ssee, effect)))
+			{
+				DebugLog::Print(DebugLog::LogType::Error, U"sseeの解析に失敗しました。");
+				return false;
+			}
+			DebugLog::Print(DebugLog::LogType::Info, U"解析完了。");
+
+			// 解析したデータをプロジェクトデータに追加
+			pOut->addEffect(effect);
+		}
 
 		// ssqeの解析
 		

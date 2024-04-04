@@ -32,6 +32,10 @@ namespace s3d::SpriteStudio::XMLParser::Utilities
 
 	bool AttributeToFloat(const XMLElement& element, StringView key, float& out);
 
+	bool AttributeToString(const XMLElement& element, StringView key, String& out);
+
+	bool AttributeToColor(const XMLElement& element, StringView key, Color& out);
+
 	template< class T, size_t N >
 	inline bool TextToEnum(const XMLElement& element, StringView name, const std::array<std::pair<const char32_t*, T>, N>& table, T& out);
 

@@ -57,11 +57,13 @@ namespace s3d::SpriteStudio
 		std::pair{ U"self"  , InheritType::Self   },
 	};
 
-	constexpr std::array<std::pair<const char32_t*, BlendType>, 8> BlendTypeTable =
+	constexpr std::array<std::pair<const char32_t*, BlendType>, 10> BlendTypeTable =
 	{
 		std::pair{ U"mix"      , BlendType::Mix       },
+		std::pair{ U"Mix"      , BlendType::Mix       }, // sseeのBehaviorがMix・・・
 		std::pair{ U"mul"      , BlendType::Mul       },
 		std::pair{ U"add"      , BlendType::Add       },
+		std::pair{ U"Add"      , BlendType::Add       }, // sseeのBehaviorがAdd・・・
 		std::pair{ U"sub"      , BlendType::Sub       },
 		std::pair{ U"mulalpha" , BlendType::MulAlpha  },
 		std::pair{ U"screen"   , BlendType::Screen    },

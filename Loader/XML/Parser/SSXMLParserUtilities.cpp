@@ -313,4 +313,48 @@ namespace s3d::SpriteStudio::XMLParser::Utilities
 		return true;
 	}
 
+	//================================================================================
+	bool AttributeToString(const XMLElement& element, StringView key, String& out)
+	{
+		auto attribute = element.attribute(String(key));
+		if (not(attribute))
+		{
+			return false;
+		}
+
+		DebugLog::Print(DebugLog::LogType::Verbose, U"--- attribute to string ------");
+		DebugLog::Print(DebugLog::LogType::Verbose, U"key :{}"_fmt(key));
+		DebugLog::Print(DebugLog::LogType::Verbose, U"val :{}"_fmt(attribute.value()));
+
+		out = attribute.value();
+
+		DebugLog::Print(DebugLog::LogType::Verbose, U"out :{}"_fmt(out));
+		return true;
+	}
+
+	//================================================================================
+	bool AttributeToColor(const XMLElement& element, StringView key, Color& out)
+	{
+		auto attribute = element.attribute(String(key));
+		if (not(attribute))
+		{
+			return false;
+		}
+
+		DebugLog::Print(DebugLog::LogType::Verbose, U"--- attribute to color -------");
+		DebugLog::Print(DebugLog::LogType::Verbose, U"key :{}"_fmt(key));
+		DebugLog::Print(DebugLog::LogType::Verbose, U"val :{}"_fmt(attribute.value()));
+
+		const auto& text = attribute.value();
+
+		if (text.length() < 6)
+		{
+			throw Error{ U"XMLのテキストからColor型へパース失敗。" };
+		}
+
+		out = Color{ U"x" + text.substr(2, 6) + text.substr(0, 2) }; // RGBA → ARGB
+
+		DebugLog::Print(DebugLog::LogType::Verbose, U"out :{}"_fmt(out));
+		return true;
+	}
 }
