@@ -538,7 +538,6 @@ namespace s3d::SpriteStudio
 		}
 
 		const auto& model = pAnimationPack->model;
-		const auto& meshBinds = model.meshBinds;
 		const size_t meshPartStateCount = m_meshPartStates.size();
 		if (meshPartStateCount == 0)
 		{
@@ -546,7 +545,8 @@ namespace s3d::SpriteStudio
 			return true;
 		}
 
-		if (meshPartStateCount != meshBinds.size())
+		const auto& modelMeshBinds = model.meshBinds;
+		if (meshPartStateCount != modelMeshBinds.size())
 		{
 			// バインド数とパーツ数が一致しない。
 			DebugLog::Print(DebugLog::LogType::Error, U"バインド数とパーツ数が一致していません。");
@@ -554,55 +554,54 @@ namespace s3d::SpriteStudio
 		}
 
 		// インデックスとパーツの紐づけを行う。
+		const auto& boneTable = model.boneTable;
 		HashTable<int32, const AnimationPartState*> pBoneIndexTable;
-		for (size_t i = 0; i < m_bonePartStates.size(); i++)
+		for (const auto& pBoneState : m_bonePartStates)
 		{
-			const auto& pBonePartState = m_bonePartStates[i];
-			const auto* pModelPart = pBonePartState->pAnimationModelPart;
+			const auto* pModelPart = pBoneState->pAnimationModelPart;
 			if (pModelPart == nullptr)
 			{
-				// モデルパーツがないのはありえないが、一旦スルー
 				continue;
 			}
-			pBoneIndexTable[static_cast<int32>(i)] = pBonePartState;
+			auto bone = boneTable.find(pModelPart->name);
+			if (bone == boneTable.end())
+			{
+				continue;
+			}
+			const int32 idx = bone->second;
+			pBoneIndexTable[idx] = pBoneState;
 		}
 
 		for (size_t i = 0; i < meshPartStateCount; i++)
 		{
-			const AnimationModelMeshBind& meshBind = meshBinds[i];
-			if (not(std::holds_alternative<AnimationPartStateMesh>(m_meshPartStates[i]->partValue)))
-			{
-				// データが取れない。どこかで設定を間違えている。
-				DebugLog::Print(DebugLog::LogType::Error, U"メッシュパーツとして値を取得できませんでした。");
-				return false;
-			}
-			auto& meshPartStateValue = std::get<AnimationPartStateMesh>(m_meshPartStates[i]->partValue);
-			auto& bindBoneInfoRaw = meshPartStateValue.bindBoneInfomations;
-			const size_t meshVertexCount = m_meshPartStates[i]->pBuffer2D->vertices.size();
+			const AnimationModelMeshBind& modelMeshBind = modelMeshBinds[i];
+			AnimationPartStateMesh* pMeshState = std::get_if<AnimationPartStateMesh>(&(m_meshPartStates[i]->partValue));
+			auto& bindBoneInfoRaw = pMeshState->bindBoneInfomations;
 
-			// モデルデータからメッシュパーツのパラメータへ反映する。
-			const auto& modelBindInfomationsArray = meshBind.vertexBinds;
+			const auto& modelBindInfomationsArray = modelMeshBind.vertexBinds;
+			size_t meshVertexCount = 0;
+			if (const auto* pBuffer = m_meshPartStates[i]->pBuffer2D.get())
+			{
+				meshVertexCount = pBuffer->vertices.size();
+			}
 			for (size_t k = 0; k < modelBindInfomationsArray.size(); k++)
 			{
-				const auto& bindInfomations = modelBindInfomationsArray[k];
-
 				if (meshVertexCount <= k)
 				{
-					// 頂点数超えたら設定できないので終わり。
-					break;
+					continue;
 				}
-
+				const auto& modelBindInfomations = modelBindInfomationsArray[k];
 				int32 cntBone = 0;
-				for (size_t n = 0; n < bindInfomations.size(); n++)
+				for (int32 n = 0; n < modelMeshBind.bindBoneNum; n++)
 				{
-					const auto& bindInfo = bindInfomations[n];
+					const auto& modelBindInfo = modelBindInfomations[n];
 					auto& infoRaw = bindBoneInfoRaw[k].infomations[n];
-					infoRaw.offset = bindInfo.offset;
-					infoRaw.weight = bindInfo.weight;
+					infoRaw.offset = modelBindInfo.offset;
+					infoRaw.weight = modelBindInfo.weight;
 
-					if (0 < pBoneIndexTable.count(bindInfo.boneIndex))
+					if (0 < pBoneIndexTable.count(modelBindInfo.boneIndex))
 					{
-						infoRaw.pState = pBoneIndexTable[bindInfo.boneIndex];
+						infoRaw.pState = pBoneIndexTable[modelBindInfo.boneIndex];
 						cntBone++;
 					}
 				}

@@ -296,6 +296,7 @@ namespace s3d::SpriteStudio::XMLParser
 				}
 				int32 infoIndex = 0;
 				out.bindBoneNum = Parse<int32>(infoLines[infoIndex++]);
+				AnimationModelMeshBind::BindBoneInfomations bindInfomations;
 				for (int32 i = 0; i < out.bindBoneNum; i++)
 				{
 					if ((dataCount <= infoIndex)
@@ -305,12 +306,37 @@ namespace s3d::SpriteStudio::XMLParser
 						DebugLog::Print(DebugLog::LogType::Error, U"メッシュバインドの情報が想定より多いです。");
 						return false;
 					}
-					AnimationModelMeshBind::BindBoneInfomations bindInfomations;
 					bindInfomations[i].boneIndex = ParseOr<int32, int32>(infoLines[infoIndex++], 0);
 					bindInfomations[i].weight = ParseOr<int32, int32>(infoLines[infoIndex++], 0);
 					bindInfomations[i].offset.x = ParseOr<float, float>(infoLines[infoIndex++], 0.0f);
 					bindInfomations[i].offset.y = ParseOr<float, float>(infoLines[infoIndex++], 0.0f);
-					out.vertexBinds.emplace_back(bindInfomations);
+				}
+				out.vertexBinds.emplace_back(bindInfomations);
+			}
+			return true;
+		}
+
+		//================================================================================
+		bool ParseModelBoneList(const XMLElement& element, HashTable<String, int32>& out)
+		{
+			if (element.name() != U"boneList")
+			{
+				return false;
+			}
+
+			DebugLog::Print(DebugLog::LogType::Verbose, U"--- animation model bone list ---");
+			for (auto child = element.firstChild(); not(child.isNull()); child = child.nextSibling())
+			{
+				String name = U"";
+				int32 value = 0;
+				if (not(Utilities::AttributeToString(child, U"key", name)))
+				{
+					continue;
+				}
+				if (Utilities::TextToInt32(child, U"item", value))
+				{
+					out[name] = value;
+					continue;
 				}
 			}
 			return true;
@@ -348,6 +374,10 @@ namespace s3d::SpriteStudio::XMLParser
 			for (auto child = element.firstChild(); not(child.isNull()); child = child.nextSibling())
 			{
 				if (ParseModelPartList(child, out.parts))
+				{
+					continue;
+				}
+				if (ParseModelBoneList(child, out.boneTable))
 				{
 					continue;
 				}

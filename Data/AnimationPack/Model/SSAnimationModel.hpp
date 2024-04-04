@@ -11,6 +11,9 @@ namespace s3d::SpriteStudio
 		/// @brief パーツリスト
 		Array<AnimationModelPart> parts{};
 
+		/// @brief ボーンリスト
+		HashTable<String, int32> boneTable{};
+
 		/// @brief メッシュバインドリスト
 		Array<AnimationModelMeshBind> meshBinds{};
 	};
