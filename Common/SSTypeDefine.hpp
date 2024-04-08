@@ -2,6 +2,15 @@
 
 namespace s3d::SpriteStudio
 {
+	/// @brief ループフラグ指定用
+	using LoopEnable = YesNo<struct LoopEnable_tag>;
+
+	/// @brief エフェクト用マジックシード値
+	constexpr signed int SeedMagic = 7573;
+
+	/// @brief 寿命延長スケール
+	constexpr signed int EffectLifeExtendScale = 64;
+
 	/// @brief メッシュバインドの最大数
 	constexpr unsigned long long int MeshBindBoneMax = 128;
 

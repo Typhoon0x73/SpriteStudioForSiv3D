@@ -49,6 +49,12 @@ namespace s3d::SpriteStudio
 		[[nodiscard]]
 		const T& getRightValue() const noexcept; // max or plus
 
+		/// @brief 左右の値から最小値と差分を取得します。
+		/// @param outMin 最小値出力先
+		/// @param outDiff 差分出力先
+		[[nodiscard]]
+		void getRange(T& outMin, T& outDiff) const;
+
 	private:
 
 		/// @brief 範囲値の種類

@@ -93,6 +93,11 @@ namespace s3d::SpriteStudio
 		[[nodiscard]]
 		const Array<std::unique_ptr<AnimationPartState>>& getPartStates() const noexcept;
 
+		/// @brief 描画用ソート済みパーツリストを取得します。
+		/// @return 描画用ソート済みパーツリスト
+		[[nodiscard]]
+		const Array<AnimationPartState*>& getDrawPartStates() const noexcept;
+
 		/// @brief 参照しているプロジェクトデータへのポインタを取得します。
 		/// @return 存在しなければ nullptr
 		[[nodiscard]]
@@ -177,6 +182,11 @@ namespace s3d::SpriteStudio
 		/// @param frame 指定フレーム
 		void updateInstance(AnimationPartState* pPartState, int32 frame);
 
+		/// @brief エフェクトパーツを指定フレームの状態に更新します。
+		/// @param pPartState 更新するパーツ
+		/// @param frame 指定フレーム
+		void updateEffect(AnimationPartState* pPartState, int32 frame);
+
 		/// @brief メッシュの状態を更新します。
 		/// @param pPartState 更新するパーツ
 		void updateMesh(AnimationPartState* pPartState);
@@ -234,5 +244,8 @@ private:
 
 		/// @brief インスタンスパーツ用の非表示フラグ
 		bool m_isInstancePartsHide;
+
+		/// @brief エフェクトのシードへ影響する値
+		int32 m_effectSeedOffset;
 	};
 }

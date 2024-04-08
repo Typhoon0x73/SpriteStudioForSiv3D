@@ -10,15 +10,15 @@ namespace s3d::SpriteStudio
 	struct EffectBehavior
 	{
 		/// @brief 効果一覧
-		Array<EffectElementVariant> elements;
+		Array<EffectElementVariant> elements{};
 
 		/// @brief セル名
-		String cellName;
+		String cellName{ U"" };
 
 		/// @brief セルマップ名
-		String cellmapName;
+		String cellmapName{ U"" };
 
 		/// @brief ブレンドの種類
-		BlendType blendType;
+		BlendType blendType{ BlendType::Invalid };
 	};
 }

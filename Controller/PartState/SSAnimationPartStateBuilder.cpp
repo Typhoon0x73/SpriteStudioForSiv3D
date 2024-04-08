@@ -126,6 +126,41 @@ namespace s3d::SpriteStudio
 				return true;
 			}
 
+			// エフェクトパーツ
+			if (partType == PartType::Effect)
+			{
+				if (pOutPartState->pAnimationModelPart == nullptr)
+				{
+					// モデルパーツがない。
+					return false;
+				}
+				// エフェクトパーツの情報を取得する。
+				const auto* pEffectInfo = std::get_if<ModelPartInfoEffect>(&(pOutPartState->pAnimationModelPart->partVariantValue));
+				if (pEffectInfo == nullptr)
+				{
+					return false;
+				}
+				// エフェクトデータを取得する。
+				const Effect* pEffect = pProject->findEffect(pEffectInfo->refEffectName);
+				if (pEffect == nullptr)
+				{
+					return false;
+				}
+				auto* pEffectpartState = std::get_if<AnimationPartStateEffect>(&(pOutPartState->partValue));
+				if (pEffectpartState == nullptr)
+				{
+					return false;
+				}
+				auto& effectControllerRaw = pEffectpartState->effectController;
+				effectControllerRaw.setParentPartState(pOutPartState);
+				effectControllerRaw.setEffectModel(&pEffect->model);
+				effectControllerRaw.setSeed(RandomUint32());
+				effectControllerRaw.reload();
+				effectControllerRaw.stop();
+				effectControllerRaw.setLoop(LoopEnable::No);
+				return true;
+			}
+
 			// メッシュパーツ
 			if (partType == PartType::Mesh)
 			{

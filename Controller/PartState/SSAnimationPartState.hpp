@@ -4,6 +4,7 @@
 #include "../../Data/AnimationPack/Animation/SSAnimationPart.hpp"
 #include "../../Data/Cellmap/SSCellmap.hpp"
 #include "SSAnimationPartStateInstance.hpp"
+#include "SSAnimationPartStateEffect.hpp"
 #include "SSAnimationPartStateMesh.hpp"
 
 namespace s3d::SpriteStudio
@@ -12,6 +13,7 @@ namespace s3d::SpriteStudio
 	using AnimationPartStateValueVarint = std::variant<
 		std::monostate
 		, AnimationPartStateInstance
+		, AnimationPartStateEffect
 		, AnimationPartStateMesh
 	>;
 

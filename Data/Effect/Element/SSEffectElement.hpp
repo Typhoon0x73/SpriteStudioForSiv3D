@@ -22,8 +22,7 @@ namespace s3d::SpriteStudio
 {
 	/// @brief エフェクト効果値
 	using EffectElementVariant = std::variant<
-		std::monostate
-		, EffectElementBasic
+		EffectElementBasic
 		, EffectElementRandomSeedChange
 		, EffectElementDelay
 		, EffectElementGravity

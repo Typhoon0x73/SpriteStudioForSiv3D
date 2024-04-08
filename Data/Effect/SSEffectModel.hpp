@@ -11,7 +11,7 @@ namespace s3d::SpriteStudio
 		Array<EffectNode> nodes{};
 
 		/// @brief 乱数固定シード値
-		Optional<int32> lockRandomSeedOpt{ none };
+		Optional<uint32> lockRandomSeedOpt{ none };
 
 		/// @brief FPS
 		int32 fps{ 60 };

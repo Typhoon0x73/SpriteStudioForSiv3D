@@ -120,7 +120,7 @@ namespace s3d::SpriteStudio::XMLParser
 			EffectElementRandomSeedChange effectElement;
 			for (auto child = element.firstChild(); not(child.isNull()); child = child.nextSibling())
 			{
-				if (Utilities::TextToInt32(child, U"Seed", effectElement.seed))
+				if (Utilities::TextToUnsignedInt32(child, U"Seed", effectElement.seed))
 				{
 					continue;
 				}
@@ -570,11 +570,11 @@ namespace s3d::SpriteStudio::XMLParser
 			{
 				return false;
 			}
-			int32 lockRandomSeed = 0;
+			uint32 lockRandomSeed = 0;
 			bool isLockRandomSeed = true;
 			for (auto child = element.firstChild(); not(child.isNull()); child = child.nextSibling())
 			{
-				if (Utilities::TextToInt32(child, U"lockRandSeed", lockRandomSeed))
+				if (Utilities::TextToUnsignedInt32(child, U"lockRandSeed", lockRandomSeed))
 				{
 					out.lockRandomSeedOpt = lockRandomSeed;
 					continue;
