@@ -119,6 +119,18 @@ namespace s3d::SpriteStudio
 		/// @param pPartState パーツ
 		void drawPartBounds(const AnimationPartState* pPartState) const;
 
+		/// @brief エフェクトの描画
+		/// @param pPartState パーツ
+		void drawPartEffect(const AnimationPartState* pPartState) const;
+
+		/// @brief パーティクルの描画
+		/// @param controller エフェクト制御参照
+		/// @param pEmitter エミッター参照
+		/// @param frame 再生フレーム
+		/// @param pParent 親エミッター
+		/// @param pParticle パーティクル
+		void drawEffectParticle(const EffectController& controller, const EffectEmitter* pEmitter, int32 frame, const EffectEmitter* pParent, const EffectParticle* pParticle) const;
+
 	private:
 
 		/// @brief 描画するアニメーションコントローラー

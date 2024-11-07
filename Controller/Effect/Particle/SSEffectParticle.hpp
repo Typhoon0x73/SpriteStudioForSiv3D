@@ -7,7 +7,7 @@ namespace s3d::SpriteStudio
 	struct EffectParticle
 	{
 		/// @brief 
-		int32 id{ 0 };
+		uint32 id{ 0 };
 
 		/// @brief 
 		int32 cycle{ 0 };

@@ -3,6 +3,7 @@
 #include "Effect/Emitter/SSEffectEmitter.hpp"
 #include "../Data/Effect/SSEffectModel.hpp"
 #include "../Data/Project/SSProject.hpp"
+#include "Effect/Particle/SSEffectParticleDrawData.hpp"
 
 namespace s3d::SpriteStudio
 {
@@ -64,12 +65,49 @@ namespace s3d::SpriteStudio
 		/// @param enable Yesでループします。Noでループしません。
 		void setLoop(LoopEnable enable);
 
+		/// @brief プロジェクトへのポインタを取得します。
+		/// @return 無ければ nullptr が返ります。
+		[[nodiscard]]
+		const Project* const getProject() const noexcept;
+
+		/// @brief ソート済みエミッターリストを取得します。
+		/// @return ソート済みエミッターリスト
+		[[nodiscard]]
+		const Array<EffectEmitter*>& getSortedEmitters() const noexcept;
+
+		/// @brief ターゲットフレームを取得します。
+		/// @return ターゲットフレーム
+		[[nodiscard]]
+		int32 getTargetFrame() const noexcept;
+
+		/// @brief 親パーツへのポインタを取得します。
+		/// @return 存在しなければ nullptr が返ります。
+		[[nodiscard]]
+		const AnimationPartState* const getParentState() const noexcept;
+
+		/// @brief 
+		/// @return 
+		[[nodiscard]]
+		const Float3& getLayoutPosition() const noexcept;
+
+		/// @brief 
+		/// @return 
+		[[nodiscard]]
+		const Float2& getLayoutScale() const noexcept;
+
 	private:
 
 		/// @brief エミッタを初期化します。
 		/// @param out 初期化対象
 		/// @param src 初期化データ
 		void initEmitter(EffectEmitter& out, const EffectNode& src);
+
+		/// @brief 
+		/// @param pEmitter 
+		/// @param frame 
+		/// @param pParent 
+		/// @param pParticleInfo 
+		void updateDrawParticles(EffectEmitter* pEmitter, int32 frame, EffectEmitter* pParent, EffectParticleDrawData* pParticleInfo);
 
 	private:
 
@@ -97,7 +135,7 @@ namespace s3d::SpriteStudio
 		/// @brief 現在のフレーム
 		int32 m_frame;
 
-		/// @brief 
+		/// @brief 描画するフレーム
 		int32 m_targetFrame;
 
 		/// @brief 
