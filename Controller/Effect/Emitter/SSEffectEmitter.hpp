@@ -5,7 +5,6 @@
 #include "SSEffectEmitterParam.hpp"
 #include "Pattern/SSEffectEmitterPattern.hpp"
 #include "../Particle/SSEffectParticle.hpp"
-#include "../Particle/SSEffectParticleDrawData.hpp"
 #include "../Particle/SSEffectParticleParam.hpp"
 #include "../../../Data/Cellmap/Cell/SSCell.hpp"
 #include "../../../Data/Effect/SSEffectBehavior.hpp"
@@ -49,9 +48,6 @@ namespace s3d::SpriteStudio
 		Array<EffectParticle> particles{};
 
 		/// @brief 
-		Array<EffectParticleDrawData> particleDrawInfos{};
-
-		/// @brief 
 		int32 particleIdMax{ 0 };
 
 		/// @brief 
@@ -68,9 +64,6 @@ namespace s3d::SpriteStudio
 
 		/// @brief 
 		const Cell* pCell{ nullptr };
-
-		/// @brief 
-		const Texture* pTexture{ nullptr };
 
 		/// @brief 
 		const EffectBehavior* pBehavior{ nullptr };
@@ -90,9 +83,7 @@ namespace s3d::SpriteStudio
 		/// @brief エミッタを更新します。
 		/// @param targetFrame 
 		/// @param offset 
-		void update(int32 targetFrame, int32 offset);
-
-		void updateParticle(int32 frame, EffectParticleDrawData* pParticleData);
+		void update(double targetFrame, int32 offset);
 
 		/// @brief 
 		/// @return 

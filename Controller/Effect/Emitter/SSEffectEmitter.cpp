@@ -10,18 +10,9 @@ namespace s3d::SpriteStudio
 		offsetPatterns.clear();
 
 		const int32 emitMax = emitterParam.emitMax;
-		if (0 < emitMax)
+		if (particles.isEmpty() and 0 < emitMax)
 		{
-			particleDrawInfos.clear();
-			particleDrawInfos.resize(static_cast<size_t>(emitMax));
-			if (particles.isEmpty())
-			{
-				particles.resize(static_cast<size_t>(emitMax));
-			}
-		}
-		for (uint32 i = 0; i < emitMax; i++)
-		{
-			particles[i].id = i;
+			particles.resize(static_cast<size_t>(emitMax));
 		}
 
 		// 最低１保証
@@ -78,7 +69,7 @@ namespace s3d::SpriteStudio
 	}
 
 	//================================================================================
-	void EffectEmitter::update(int32 targetFrame, int32 offset)
+	void EffectEmitter::update(double targetFrame, int32 offset)
 	{
 		const size_t offsetNum = offsetPatterns.size();
 		const size_t emitNum = emitPatterns.size();
@@ -91,7 +82,7 @@ namespace s3d::SpriteStudio
 
 			const EffectEmitterPattern* pTarget = &emitPatterns[slideIndex];
 
-			const int32 tmpTime = targetFrame - offsetPatterns[i];
+			const int32 tmpTime = static_cast<int>(targetFrame - offsetPatterns[i]);
 
 			particlesRaw[i].isExist = false;
 			particlesRaw[i].isBorn = false;
@@ -106,8 +97,8 @@ namespace s3d::SpriteStudio
 				particlesRaw[i].startTime = static_cast<int64>(cycleTop + offsetPatterns[i]);
 				particlesRaw[i].endTime = particlesRaw[i].startTime + pTarget->life;
 
-				if (particlesRaw[i].startTime <= static_cast<int64>(targetFrame)
-					and static_cast<int64>(targetFrame) < particlesRaw[i].endTime)
+				if (static_cast<double>(particlesRaw[i].startTime) <= targetFrame
+					and targetFrame < static_cast<double>(particlesRaw[i].endTime))
 				{
 					particlesRaw[i].isExist = true;
 					particlesRaw[i].isBorn = true;
