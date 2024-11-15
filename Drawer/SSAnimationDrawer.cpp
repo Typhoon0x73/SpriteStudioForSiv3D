@@ -7,14 +7,14 @@ namespace s3d::SpriteStudio
 	{
 		switch (blendType)
 		{
-		case BlendType::Mix:       return BlendState{ true, Blend::SrcAlpha    , Blend::InvSrcAlpha , BlendOp::Add };
-		case BlendType::Mul:       return BlendState{ true, Blend::Zero        , Blend::SrcColor    , BlendOp::Add };
-		case BlendType::Add:       return BlendState{ true, Blend::SrcAlpha    , Blend::One         , BlendOp::Add };
-		case BlendType::Sub:       return BlendState{ true, Blend::SrcAlpha    , Blend::One         , BlendOp::RevSubtract, Blend::Zero, Blend::DestAlpha };
-		case BlendType::MulAlpha:  return BlendState{ true, Blend::DestColor   , Blend::InvSrcAlpha , BlendOp::Add };
-		case BlendType::Screen:    return BlendState{ true, Blend::InvDestColor, Blend::One         , BlendOp::Add };
-		case BlendType::Exclusion: return BlendState{ true, Blend::InvDestColor, Blend::InvDestColor, BlendOp::Add };
-		case BlendType::Invert:    return BlendState{ true, Blend::InvDestColor, Blend::Zero        , BlendOp::Add };
+		case BlendType::Mix:       return BlendState{ true, Blend::SrcAlpha    , Blend::InvSrcAlpha, BlendOp::Add        , Blend::One         , Blend::Zero       , BlendOp::Add };
+		case BlendType::Mul:       return BlendState{ true, Blend::Zero        , Blend::SrcColor   , BlendOp::Add        , Blend::InvSrcAlpha , Blend::One        , BlendOp::Add };
+		case BlendType::Add:       return BlendState{ true, Blend::SrcAlpha    , Blend::One        , BlendOp::Add        , Blend::One         , Blend::Zero       , BlendOp::Add };
+		case BlendType::Sub:       return BlendState{ true, Blend::SrcAlpha    , Blend::One        , BlendOp::RevSubtract, Blend::One         , Blend::Zero       , BlendOp::Add };
+		case BlendType::MulAlpha:  return BlendState{ true, Blend::DestColor   , Blend::InvSrcAlpha, BlendOp::Add        , Blend::DestAlpha   , Blend::InvSrcAlpha, BlendOp::Add };
+		case BlendType::Screen:    return BlendState{ true, Blend::InvDestColor, Blend::One        , BlendOp::Add        , Blend::InvDestAlpha, Blend::One        , BlendOp::Add };
+		case BlendType::Exclusion: return BlendState{ true, Blend::InvDestColor, Blend::InvSrcColor, BlendOp::Add        , Blend::InvDestAlpha, Blend::InvSrcAlpha, BlendOp::Add };
+		case BlendType::Invert:    return BlendState{ true, Blend::InvDestColor, Blend::Zero       , BlendOp::Add        , Blend::InvDestAlpha, Blend::Zero       , BlendOp::Add };
 
 		default: break;
 		}
