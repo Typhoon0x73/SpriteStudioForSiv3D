@@ -167,40 +167,6 @@ namespace s3d::SpriteStudio
 	}
 
 	//================================================================================
-	const Cell* const Project::findCell(StringView cellmapName, StringView cellName) const noexcept
-	{
-		for (const auto& cellmap : m_cellmaps)
-		{
-			if (cellmap.name != cellmapName)
-			{
-				continue;
-			}
-			for (const auto& cell : cellmap.cells)
-			{
-				if (cell.name != cellName)
-				{
-					continue;
-				}
-				return &cell;
-			}
-		}
-		return nullptr;
-	}
-
-	//================================================================================
-	const Effect* const Project::findEffect(StringView effectName) const noexcept
-	{
-		for (const auto& effect : m_effects)
-		{
-			if (effect.name == effectName)
-			{
-				return &effect;
-			}
-		}
-		return nullptr;
-	}
-
-	//================================================================================
 	Project::operator bool() const noexcept
 	{
 		return not(isEmpty());

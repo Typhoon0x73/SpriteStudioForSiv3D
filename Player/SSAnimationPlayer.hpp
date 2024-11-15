@@ -9,6 +9,9 @@ namespace s3d::SpriteStudio
 	/// @brief 生成時にplay関数を呼んでおくか
 	using StartPlaying = YesNo<struct StartPlaying_tag>;
 
+	/// @brief ループフラグ指定用
+	using LoopEnable = YesNo<struct LoopEnable_tag>;
+
 	/// @brief 同じアニメーションを指定していても切り替えるか
 	using SameChange = YesNo<struct SameChange_tag>;
 

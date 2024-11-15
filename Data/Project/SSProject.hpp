@@ -104,19 +104,6 @@ namespace s3d::SpriteStudio
 		[[nodiscard]]
 		const Cell* const findCell(int32 mapId, StringView cellName) const noexcept;
 
-		/// @brief 指定情報からセルを探します。
-		/// @param cellmapName セルマップ名
-		/// @param cellName セル名
-		/// @return 見つかった場合、セルへのポインタが返ります。それ以外 nullptr
-		[[nodiscard]]
-		const Cell* const findCell(StringView cellmapName, StringView cellName) const noexcept;
-
-		/// @brief 指定情報からエフェクトを探します。
-		/// @param effectName エフェクト名
-		/// @return 見つかった場合、エフェクトへのポインタが返ります。それ以外 nullptr
-		[[nodiscard]]
-		const Effect* const findEffect(StringView effectName) const noexcept;
-
 		/// @brief プロジェクトデータが空でないかを返します。
 		/// @return プロジェクトデータが空でない場合 true, それ以外の場合は false
 		[[nodiscard]]

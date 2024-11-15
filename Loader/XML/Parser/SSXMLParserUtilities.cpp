@@ -22,24 +22,6 @@ namespace s3d::SpriteStudio::XMLParser::Utilities
 	}
 
 	//================================================================================
-	bool TextToUnsignedInt32(const XMLElement& element, StringView name, uint32& out)
-	{
-		if (element.name() != name)
-		{
-			return false;
-		}
-
-		DebugLog::Print(DebugLog::LogType::Verbose, U"--- text to uint32 -----------");
-		DebugLog::Print(DebugLog::LogType::Verbose, U"name:{}"_fmt(name));
-		DebugLog::Print(DebugLog::LogType::Verbose, U"text:{}"_fmt(element.text()));
-
-		out = Parse<uint32>(element.text());
-
-		DebugLog::Print(DebugLog::LogType::Verbose, U"out :{}"_fmt(out));
-		return true;
-	}
-
-	//================================================================================
 	bool TextToBool(const XMLElement& element, StringView name, bool& out)
 	{
 		if (element.name() != name)

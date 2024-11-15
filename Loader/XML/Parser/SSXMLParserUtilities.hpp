@@ -6,8 +6,6 @@ namespace s3d::SpriteStudio::XMLParser::Utilities
 {
 	bool TextToInt32(const XMLElement& element, StringView name, int32& out);
 
-	bool TextToUnsignedInt32(const XMLElement& element, StringView name, uint32& out);
-
 	bool TextToBool(const XMLElement& element, StringView name, bool& out);
 
 	bool TextToFloat(const XMLElement& element, StringView name, float& out);

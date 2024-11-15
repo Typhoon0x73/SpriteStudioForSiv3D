@@ -4,9 +4,6 @@
 
 namespace s3d::SpriteStudio
 {
-	/// @brief エミッタ
-	struct EffectEmitter;
-
 	/// @brief 座標
 	struct EffectElementPosition
 	{
@@ -15,9 +12,5 @@ namespace s3d::SpriteStudio
 
 		/// @brief 上下幅
 		RangeValue<float> offsetY{ 0.0f, 0.0f };
-
-		/// @brief 初期化
-		/// @param outEmitter 初期化するエミッタ
-		void initialize(EffectEmitter& outEmitter) const;
 	};
 }
