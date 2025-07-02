@@ -56,17 +56,17 @@ namespace s3d::SpriteStudio::DebugLog
 		}
 		case LogType::Error:
 		{
-			typeStr = U"error";
+			typeStr = U"error  ";
 			break;
 		}
 		case LogType::Notice:
 		{
-			typeStr = U"notice";
+			typeStr = U"notice ";
 			break;
 		}
 		case LogType::Info:
 		{
-			typeStr = U"info";
+			typeStr = U"info   ";
 			break;
 		}
 		case LogType::Verbose:
