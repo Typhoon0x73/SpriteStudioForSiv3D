@@ -46,7 +46,7 @@ namespace s3d::SpriteStudio::Utilities
 		DebugLog::Print(DebugLog::LogType::Info, U"読み込むファイルパス: {}"_fmt(filePath));
 		if (pOut == nullptr)
 		{
-			DebugLog::Print(DebugLog::LogType::Werning, U"出力先がnullptrです。");
+			DebugLog::Print(DebugLog::LogType::Warning, U"出力先がnullptrです。");
 			return false;
 		}
 

@@ -11,7 +11,7 @@ namespace s3d::SpriteStudio
 		{
 		case FileType::Unknown:
 		{
-			DebugLog::Print(DebugLog::LogType::Werning, U"不明なファイルの種類の為nullptrを返します。");
+			DebugLog::Print(DebugLog::LogType::Warning, U"不明なファイルの種類の為nullptrを返します。");
 			return nullptr;
 		}
 		case FileType::Xml:

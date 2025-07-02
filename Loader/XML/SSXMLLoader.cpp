@@ -23,7 +23,7 @@ namespace s3d::SpriteStudio
 		// 出力先の存在確認
 		if (pOut == nullptr)
 		{
-			DebugLog::Print(DebugLog::LogType::Werning, U"出力先がnullptrです。");
+			DebugLog::Print(DebugLog::LogType::Warning, U"出力先がnullptrです。");
 			return false;
 		}
 
@@ -90,7 +90,7 @@ namespace s3d::SpriteStudio
 			// Ver6未満は動作保証するつもりが無いので警告を出しておく。
 			if (animPack.getSetupAnimation() == nullptr)
 			{
-				DebugLog::Print(DebugLog::LogType::Werning, U"セットアップデータがありません。");
+				DebugLog::Print(DebugLog::LogType::Warning, U"セットアップデータがありません。");
 			}
 
 			// 解析したデータをプロジェクトデータに追加

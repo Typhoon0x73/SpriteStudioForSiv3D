@@ -49,9 +49,9 @@ namespace s3d::SpriteStudio::DebugLog
 		String typeStr = U"";
 		switch (type)
 		{
-		case LogType::Werning:
+		case LogType::Warning:
 		{
-			typeStr = U"werning";
+			typeStr = U"warning";
 			break;
 		}
 		case LogType::Error:

@@ -12,7 +12,7 @@ namespace s3d::SpriteStudio::DebugLog
 	/// @brief ログの種類
 	enum class LogType : size_t
 	{
-		Werning, ///< 警告（間違った使い方をしている）
+		Warning, ///< 警告（間違った使い方をしている）
 		Error,   ///< エラー（問題があり利用できない状態）
 		Notice,  ///< 開発者への通知（未実装や不明なパラメータを発見した場合）
 		Info,    ///< 基本的な情報
