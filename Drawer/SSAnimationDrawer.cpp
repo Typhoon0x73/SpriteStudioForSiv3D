@@ -7,15 +7,14 @@ namespace s3d::SpriteStudio
 	{
 		switch (blendType)
 		{
-		case BlendType::Mix:       return BlendState{ true, Blend::SrcAlpha    , Blend::InvSrcAlpha , BlendOp::Add };
-		case BlendType::Mul:       return BlendState{ true, Blend::Zero        , Blend::SrcColor    , BlendOp::Add };
-		case BlendType::Add:       return BlendState{ true, Blend::SrcAlpha    , Blend::One         , BlendOp::Add };
-		case BlendType::Sub:       return BlendState{ true, Blend::SrcAlpha    , Blend::One         , BlendOp::RevSubtract, Blend::Zero, Blend::DestAlpha };
-		case BlendType::MulAlpha:  return BlendState{ true, Blend::DestColor   , Blend::InvSrcAlpha , BlendOp::Add };
-		case BlendType::Screen:    return BlendState{ true, Blend::InvDestColor, Blend::One         , BlendOp::Add };
-		case BlendType::Exclusion: return BlendState{ true, Blend::InvDestColor, Blend::InvDestColor, BlendOp::Add };
-		case BlendType::Invert:    return BlendState{ true, Blend::InvDestColor, Blend::Zero        , BlendOp::Add };
-
+		case BlendType::Mix:       return BlendState{ true, Blend::SrcAlpha    , Blend::InvSrcAlpha, BlendOp::Add        , Blend::One         , Blend::Zero       , BlendOp::Add };
+		case BlendType::Mul:       return BlendState{ true, Blend::DestColor   , Blend::InvSrcAlpha, BlendOp::Add        , Blend::DestAlpha   , Blend::InvSrcAlpha, BlendOp::Add };
+		case BlendType::Add:       return BlendState{ true, Blend::SrcAlpha    , Blend::One        , BlendOp::Add        , Blend::One         , Blend::Zero       , BlendOp::Add };
+		case BlendType::Sub:       return BlendState{ true, Blend::SrcAlpha    , Blend::One        , BlendOp::RevSubtract, Blend::One         , Blend::Zero       , BlendOp::Add };
+		case BlendType::MulAlpha:  return BlendState{ true, Blend::Zero        , Blend::SrcColor   , BlendOp::Add        , Blend::Zero        , Blend::One        , BlendOp::Add/*, true*/ };
+		case BlendType::Screen:    return BlendState{ true, Blend::InvDestColor, Blend::One        , BlendOp::Add        , Blend::InvDestAlpha, Blend::One        , BlendOp::Add };
+		case BlendType::Exclusion: return BlendState{ true, Blend::InvDestColor, Blend::InvSrcColor, BlendOp::Add        , Blend::InvDestAlpha, Blend::InvSrcAlpha, BlendOp::Add };
+		case BlendType::Invert:    return BlendState{ true, Blend::InvDestColor, Blend::Zero       , BlendOp::Add        , Blend::InvDestAlpha, Blend::Zero       , BlendOp::Add };
 		default: break;
 		}
 		return BlendState{ BlendState::Default2D };
@@ -240,10 +239,42 @@ namespace s3d::SpriteStudio
 		// パーツカラー使用
 		if (pPartState->usePartsColor)
 		{
+			const Float4 oldColors[] =
+			{
+				pBuffer2D->vertices[0].color, pBuffer2D->vertices[1].color,
+				pBuffer2D->vertices[2].color, pBuffer2D->vertices[3].color,
+			};
 			const auto& partsColor = pPartState->partsColor;
+			for (int i = 0; i < 4; i++)
+			{
+				int32 colorIndex = ((partsColor.target == ColorBlendTarget::Vertex) ? i : 0);
+				ColorF blendColor{ partsColor.colors[colorIndex].rgba };
+				pBuffer2D->vertices[i].color.w *= (partsColor.colors[colorIndex].rgba.a / 255.0f);
+			}
+
+			// 通常描画
+			pBuffer2D->draw(*pTexture);
+
+			for (int i = 0; i < 4; i++)
+			{
+				int32 colorIndex = ((partsColor.target == ColorBlendTarget::Vertex) ? i : 0);
+				ColorF blendColor{ partsColor.colors[colorIndex].rgba };
+				if (partsColor.blendType == BlendType::Mix)
+				{
+					blendColor.a = static_cast<double>(partsColor.colors[colorIndex].rate);
+				}
+				pBuffer2D->vertices[i].color = blendColor.toFloat4();
+				pBuffer2D->vertices[i].color.w *= oldColors[i].w; // 元のアルファ値をかける
+			}
+
 			BlendState colorBlend{ GetBlendState(partsColor.blendType) };
 			const ScopedRenderStates2D renderState{ colorBlend };
 			pBuffer2D->draw();
+
+			for (int i = 0; i < 4; i++)
+			{
+				pBuffer2D->vertices[i].color = oldColors[i];
+			}
 		}
 		else
 		{
