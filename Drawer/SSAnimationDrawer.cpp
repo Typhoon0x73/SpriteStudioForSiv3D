@@ -151,12 +151,8 @@ namespace s3d::SpriteStudio
 		{
 			return;
 		}
-		for (const auto& pPartState : pAnimationController->getDrawPartStates())
+		for (const auto& pPartState : pAnimationController->getPartStates())
 		{
-			if (pPartState == nullptr)
-			{
-				continue;
-			}
 			const auto& pModelPart = pPartState->pAnimationModelPart;
 			if (pModelPart == nullptr)
 			{
@@ -177,25 +173,25 @@ namespace s3d::SpriteStudio
 			case PartType::Normal:
 			{
 				const Transformer2D drawTrans{ Mat3x2::Translate(x, y) };
-				drawPartNormal(pPartState);
+				drawPartNormal(pPartState.get());
 				break;
 			}
 			case PartType::Instance:
 			{
-				drawPartInstance(pPartState, x, y);
+				drawPartInstance(pPartState.get(), x, y);
 				break;
 			}
 			case PartType::Mesh:
 			{
 				const Transformer2D drawTrans{ Mat3x2::Translate(x, y) };
-				drawPartMesh(pPartState);
+				drawPartMesh(pPartState.get());
 				break;
 			}
 			default:
 				break;
 			}
 
-			drawPartBounds(pPartState);
+			drawPartBounds(pPartState.get());
 		}
 	}
 

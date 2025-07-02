@@ -74,7 +74,6 @@ namespace s3d::SpriteStudio
 		, m_isFoundKeyHide{ false }
 		, m_isFoundKeySizeX{ false }
 		, m_isFoundKeySizeY{ false }
-		, m_effectSeedOffset{ 0 }
 	{
 	}
 
@@ -319,12 +318,6 @@ namespace s3d::SpriteStudio
 	const Array<std::unique_ptr<AnimationPartState>>& AnimationController::getPartStates() const noexcept
 	{
 		return m_partStates;
-	}
-
-	//================================================================================
-	const Array<AnimationPartState*>& AnimationController::getDrawPartStates() const noexcept
-	{
-		return m_sortPartStates;
 	}
 
 	//================================================================================
@@ -818,7 +811,6 @@ namespace s3d::SpriteStudio
 			// エフェクトパーツの更新
 			if (partType == PartType::Effect)
 			{
-				updateEffect(pPartState, frame);
 			}
 
 			// メッシュパーツの更新
@@ -1218,53 +1210,6 @@ namespace s3d::SpriteStudio
 
 		// 戻す
 		pPartState->alpha = originalAlpha;
-	}
-
-	//================================================================================
-	void AnimationController::updateEffect(AnimationPartState* pPartState, int32 frame)
-	{
-		if (pPartState == nullptr
-			or pPartState->isHide)
-		{
-			return;
-		}
-
-		auto* pEffectPartState = std::get_if<AnimationPartStateEffect>(&(pPartState->partValue));
-		if (pEffectPartState == nullptr)
-		{
-			return;
-		}
-		auto& refEffectControllerRaw = pEffectPartState->effectController;
-
-		// 独立動作
-		if (pPartState->effectParam.isIndependent)
-		{
-			// 初期化済み
-			if (pPartState->effectParam.isAttributeInitialized)
-			{
-				pPartState->effectTimeTotal += (frame - m_prevFrame) * pPartState->effectParam.speed;
-				refEffectControllerRaw.setLoop(LoopEnable::Yes);
-				refEffectControllerRaw.setFrame(static_cast<int32>(pPartState->effectTimeTotal));
-				refEffectControllerRaw.play();
-				refEffectControllerRaw.apply();
-			}
-		}
-		else
-		{
-			float playTime = (float)(frame - pPartState->effectTime);
-			if (playTime < 0)
-			{
-				return;
-			}
-
-			playTime *= pPartState->effectParam.speed;
-			playTime += pPartState->effectParam.startTime;
-
-			refEffectControllerRaw.setSeedOffset(m_effectSeedOffset);
-			refEffectControllerRaw.setFrame(static_cast<int32>(playTime));
-			refEffectControllerRaw.play();
-			refEffectControllerRaw.apply();
-		}
 	}
 
 	//================================================================================

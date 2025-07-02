@@ -4,9 +4,6 @@
 
 namespace s3d::SpriteStudio
 {
-	/// @brief エミッタ
-	struct EffectEmitter;
-
 	/// @brief パーティクルを構成する基本の値
 	struct EffectElementBasic
 	{
@@ -36,9 +33,5 @@ namespace s3d::SpriteStudio
 
 		/// @brief 優先度
 		int32 priority{ 64 };
-
-		/// @brief 初期化
-		/// @param outEmitter 初期化するエミッタ
-		void initialize(EffectEmitter& outEmitter) const;
 	};
 }
