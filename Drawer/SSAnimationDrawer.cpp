@@ -240,80 +240,16 @@ namespace s3d::SpriteStudio
 		// パーツカラー使用
 		if (pPartState->usePartsColor)
 		{
-			const Float4 oldColors[] =
-			{
-				pBuffer2D->vertices[0].color, pBuffer2D->vertices[1].color,
-				pBuffer2D->vertices[2].color, pBuffer2D->vertices[3].color,
-			};
 			const auto& partsColor = pPartState->partsColor;
-			// 下地のアルファ値を設定
-			for (int i = 0; i < 4; i++)
-			{
-				if (partsColor.blendType == BlendType::Mix)
-				{
-					break;
-				}
-				int32 colorIndex = 0;
-				if (partsColor.target == ColorBlendTarget::Vertex)
-				{
-					colorIndex = i;
-				}
-				pBuffer2D->vertices[i].color.w *= (partsColor.colors[colorIndex].rgba.a / 255.0f);
-
-				// Mulの場合、直接色にかけて表示。ブレンドだとアルファ値の扱いが違う？
-				// サンプルと同じにするためにこうしているが、たぶん違う・・・
-				if (partsColor.blendType == BlendType::Mul)
-				{
-					pBuffer2D->vertices[i].color *= ColorF{ partsColor.colors[colorIndex].rgba }.toFloat4();
-				}
-			}
-			// 下地を描画
-			{
-				pBuffer2D->draw(*pTexture);
-
-				// Mulの場合無理やり乗算描画のため下地だけで終わり。
-				if (partsColor.blendType == BlendType::Mul)
-				{
-					// 加工した色を戻しておく
-					for (int32 i = 0; i < 4; i++)
-					{
-						pBuffer2D->vertices[i].color = oldColors[i];
-					}
-					return;
-				}
-			}
-			// ブレンド用色加工
-			for (int32 i = 0; i < 4; i++)
-			{
-				int32 colorIndex = 0;
-				if (partsColor.target == ColorBlendTarget::Vertex)
-				{
-					colorIndex = i;
-				}
-				ColorF blendColor{ partsColor.colors[colorIndex].rgba };
-				if (partsColor.blendType == BlendType::Mix)
-				{
-					blendColor.a = static_cast<double>(partsColor.colors[colorIndex].rate);
-				}
-				pBuffer2D->vertices[i].color = blendColor.toFloat4();
-				pBuffer2D->vertices[i].color.w *= oldColors[i].w; // 元のアルファ値をかける
-			}
-			// ブレンド
-			{
-				BlendState colorBlend{ GetBlendState(partsColor.blendType) };
-				const ScopedRenderStates2D renderState{ colorBlend };
-				pBuffer2D->draw();
-			}
-			// 加工した色を戻しておく
-			for (int32 i = 0; i < 4; i++)
-			{
-				pBuffer2D->vertices[i].color = oldColors[i];
-			}
-			return;
+			BlendState colorBlend{ GetBlendState(partsColor.blendType) };
+			const ScopedRenderStates2D renderState{ colorBlend };
+			pBuffer2D->draw();
 		}
-
-		// 通常描画
-		pBuffer2D->draw(*pTexture);
+		else
+		{
+			// 通常描画
+			pBuffer2D->draw(*pTexture);
+		}
 	}
 
 	//================================================================================
