@@ -8,10 +8,10 @@ namespace s3d::SpriteStudio
 		switch (blendType)
 		{
 		case BlendType::Mix:       return BlendState{ true, Blend::SrcAlpha    , Blend::InvSrcAlpha, BlendOp::Add        , Blend::One         , Blend::Zero       , BlendOp::Add };
-		case BlendType::Mul:       return BlendState{ true, Blend::DestColor   , Blend::InvSrcAlpha, BlendOp::Add        , Blend::DestAlpha   , Blend::InvSrcAlpha, BlendOp::Add };
+		case BlendType::Mul:       return BlendState{ true, Blend::Zero        , Blend::SrcColor   , BlendOp::Add        , Blend::Zero        , Blend::One        , BlendOp::Add }; // ColorMul2Dを使うので使用しない。
 		case BlendType::Add:       return BlendState{ true, Blend::SrcAlpha    , Blend::One        , BlendOp::Add        , Blend::One         , Blend::Zero       , BlendOp::Add };
 		case BlendType::Sub:       return BlendState{ true, Blend::SrcAlpha    , Blend::One        , BlendOp::RevSubtract, Blend::One         , Blend::Zero       , BlendOp::Add };
-		case BlendType::MulAlpha:  return BlendState{ true, Blend::Zero        , Blend::SrcColor   , BlendOp::Add        , Blend::Zero        , Blend::One        , BlendOp::Add/*, true*/ };
+		case BlendType::MulAlpha:  return BlendState{ true, Blend::DestColor   , Blend::InvSrcAlpha, BlendOp::Add        , Blend::DestAlpha   , Blend::InvSrcAlpha, BlendOp::Add };
 		case BlendType::Screen:    return BlendState{ true, Blend::InvDestColor, Blend::One        , BlendOp::Add        , Blend::InvDestAlpha, Blend::One        , BlendOp::Add };
 		case BlendType::Exclusion: return BlendState{ true, Blend::InvDestColor, Blend::InvSrcColor, BlendOp::Add        , Blend::InvDestAlpha, Blend::InvSrcAlpha, BlendOp::Add };
 		case BlendType::Invert:    return BlendState{ true, Blend::InvDestColor, Blend::Zero       , BlendOp::Add        , Blend::InvDestAlpha, Blend::Zero       , BlendOp::Add };
@@ -247,6 +247,10 @@ namespace s3d::SpriteStudio
 			const auto& partsColor = pPartState->partsColor;
 			for (int i = 0; i < 4; i++)
 			{
+				if (partsColor.blendType == BlendType::Mix)
+				{
+					break;
+				}
 				int32 colorIndex = ((partsColor.target == ColorBlendTarget::Vertex) ? i : 0);
 				ColorF blendColor{ partsColor.colors[colorIndex].rgba };
 				pBuffer2D->vertices[i].color.w *= (partsColor.colors[colorIndex].rgba.a / 255.0f);
@@ -259,17 +263,24 @@ namespace s3d::SpriteStudio
 			{
 				int32 colorIndex = ((partsColor.target == ColorBlendTarget::Vertex) ? i : 0);
 				ColorF blendColor{ partsColor.colors[colorIndex].rgba };
-				if (partsColor.blendType == BlendType::Mix)
-				{
-					blendColor.a = static_cast<double>(partsColor.colors[colorIndex].rate);
-				}
 				pBuffer2D->vertices[i].color = blendColor.toFloat4();
 				pBuffer2D->vertices[i].color.w *= oldColors[i].w; // 元のアルファ値をかける
+				if (partsColor.target == ColorBlendTarget::Whole)
+				{
+					pBuffer2D->vertices[i].color.w *= partsColor.colors[colorIndex].rate;
+				}
 			}
-
-			BlendState colorBlend{ GetBlendState(partsColor.blendType) };
-			const ScopedRenderStates2D renderState{ colorBlend };
-			pBuffer2D->draw();
+			if (partsColor.blendType == BlendType::Mul)
+			{
+				const ScopedColorMul2D renderState{ Palette::White };
+				pBuffer2D->draw();
+			}
+			else
+			{
+				BlendState colorBlend{ GetBlendState(partsColor.blendType) };
+				const ScopedRenderStates2D renderState{ colorBlend };
+				pBuffer2D->draw();
+			}
 
 			for (int i = 0; i < 4; i++)
 			{
